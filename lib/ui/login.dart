@@ -92,9 +92,15 @@ class LoginPage extends StatelessWidget {
           
           //BUTTON LOGIN
           const SizedBox(height: 20),
-          
+
           //Menggunakan Custom Widget
-          const CustomFilledButton(title: 'Login',),
+          CustomFilledButton(
+            title: 'Login',
+            onPressed: () {
+             Navigator.pushNamedAndRemoveUntil(
+              context,'/home',(route) => false);
+            },
+            ),
           const SizedBox(height: 150),
           Align(
             child: Text('PT. Sicepat Payung Sekaki',

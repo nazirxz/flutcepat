@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:sicepat/shared/theme.dart';
-import 'package:sicepat/ui/login.dart';
+
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,7 +17,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState(){
     super.initState();
     Timer(const Duration(seconds: 2), () { 
-      Navigator.pushNamed(context,'/login');
+      Navigator.pushNamedAndRemoveUntil(
+        context,'/login',
+        (route)=> false);
     });
   }
   @override

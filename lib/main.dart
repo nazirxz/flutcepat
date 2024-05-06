@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sicepat/ui/home_page.dart';
 import 'package:sicepat/ui/login.dart';
 import 'package:sicepat/ui/splash_screen.dart';
 
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/login':(context) => const LoginPage(),
+        '/home':(context) => const HomePage(),
       },
     );
   }
