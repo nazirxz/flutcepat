@@ -11,7 +11,7 @@ class LoginPage extends StatelessWidget {
       backgroundColor: bgColor,
       body: ListView(
         padding: const EdgeInsets.symmetric(
-          horizontal: 15
+          horizontal: 20
         ),
         children:  [
           Container(
@@ -48,6 +48,73 @@ class LoginPage extends StatelessWidget {
             'assets/login_illustration.svg',
             width: 257,
             height: 236,
+          ),
+
+          const SizedBox(height: 40),
+
+          //INPUT FIELD
+
+          //Input Username
+          Text(
+            'Username',
+            style: poppinBold.copyWith(
+              fontSize: 17,
+              fontWeight: bold
+            ),
+          ),
+          TextFormField(
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            contentPadding: const EdgeInsets.all(12)
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          //Input Password
+           Text(
+            'Password',
+            style: poppinBold.copyWith(
+              fontSize: 17,
+              fontWeight: bold
+            ),
+          ),
+          TextFormField(
+            decoration: InputDecoration(
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              contentPadding: const EdgeInsets.all(12)
+            ),
+          ),
+          
+          //BUTTON LOGIN
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: TextButton(
+              onPressed: (){},
+              style: TextButton.styleFrom(
+                backgroundColor: redColor,
+                
+              ), 
+              child: Text(
+                'Login',
+                style: poppinsboldWhite.copyWith(
+                  fontSize: 15,
+                  fontWeight: bold
+                ),
+                ),
+            ),
+          ),
+          const SizedBox(height: 150),
+          Align(
+            child: Text('PT. Sicepat Payung Sekaki',
+            style: outfitBold,
+
+          )
           )
           
         ],        
