@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sicepat/ui/login.dart';
 import 'package:sicepat/ui/splash_screen.dart';
 
 void main() {
@@ -13,11 +14,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'sicepat',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
-        useMaterial3: true
-      ),
-      home: const SplashScreen(),
+      // theme: ThemeData(
+      //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
+      //   useMaterial3: true
+      // ),
+      routes: {
+        '/': (context) => const SplashScreen(),
+        '/login':(context) => const LoginPage(),
+      },
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sicepat/shared/theme.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sicepat/widget/buttons.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -91,24 +92,9 @@ class LoginPage extends StatelessWidget {
           
           //BUTTON LOGIN
           const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: TextButton(
-              onPressed: (){},
-              style: TextButton.styleFrom(
-                backgroundColor: redColor,
-                
-              ), 
-              child: Text(
-                'Login',
-                style: poppinsboldWhite.copyWith(
-                  fontSize: 15,
-                  fontWeight: bold
-                ),
-                ),
-            ),
-          ),
+          
+          //Menggunakan Custom Widget
+          const CustomFilledButton(title: 'Login',),
           const SizedBox(height: 150),
           Align(
             child: Text('PT. Sicepat Payung Sekaki',

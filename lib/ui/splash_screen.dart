@@ -17,11 +17,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState(){
     super.initState();
     Timer(const Duration(seconds: 2), () { 
-      Navigator.push(
-        context, MaterialPageRoute(
-          builder: (context) => const LoginPage()
-          )
-        );
+      Navigator.pushNamed(context,'/login');
     });
   }
   @override
@@ -30,8 +26,8 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: bgColor,
       body: Center(
         child: Container(
-          width: 239,
-          height: 247,
+          width: 139,
+          height: 147,
           decoration: const BoxDecoration(
             image: DecorationImage(image: AssetImage('assets/logo.png'))
           ),
