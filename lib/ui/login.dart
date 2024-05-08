@@ -97,7 +97,7 @@ class LoginPage extends StatelessWidget {
           CustomFilledButton(
             title: 'Login',
             onPressed: () {
-             Navigator.pushNamedAndRemoveUntil(
+             Navigator.pushNamedAndRemoveUntil( //Command biar gk bisa balik ke halaman selanjutnya
               context,'/home',(route) => false);
             },
             ),
