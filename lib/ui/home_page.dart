@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sicepat/shared/theme.dart';
-import 'package:sicepat/widget/map_screen.dart';
+import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,21 +13,22 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    MapScreen(), // Map Screen for the first tab
-  ];
-
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
+  final List<Widget> _pages = [
+    Center(child: Text('Home Page Content')), // Replace with your home page content
+    profile_page(),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         selectedItemColor: redColor,
@@ -45,11 +46,12 @@ class _HomePageState extends State<HomePage> {
             ),
             label: 'Rute Pengantaran',
           ),
-            BottomNavigationBarItem(
+          BottomNavigationBarItem(
             icon: SvgPicture.asset(
               'assets/User.svg',
-            width: 10,
-            height: 30,
+              width: 24,
+              height: 24,
+              color: _selectedIndex == 1 ? redColor : grayColor,
             ),
             label: 'Akun',
           ),
