@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
+import '../model/Kurir.dart';
 
 class profile_page extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)?.settings.arguments;
+    Kurir kurir = Kurir(id: 0, namaLengkap: "", nohp: "", username: "", password: "", region: "", noPolisi: "");
+
+    if (args != null && args is Map<String, dynamic>) {
+      kurir = args['kurir'] as Kurir; // Pastikan argumen adalah Map dan ambil Kurir
+    }
+
     return Scaffold(
-      
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             CircleAvatar(
               radius: 50,
-              backgroundImage: AssetImage('assets/johndoe.png'), // Correct the image path
+              backgroundImage: AssetImage('assets/johndoe.png'),
             ),
             SizedBox(height: 16),
             Text(
-              'John Doe',
+              kurir.namaLengkap, // Ambil nama dari objek kurir
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -25,13 +32,17 @@ class profile_page extends StatelessWidget {
             SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () {
-                Navigator.pushNamedAndRemoveUntil( //Command biar gk bisa balik ke halaman selanjutnya
-              context,'/login',(route) => false);
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/login',
+                      (route) => false,
+                );
               },
               icon: Icon(Icons.logout),
               label: Text('Logout'),
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: Colors.red, // Set text color to white
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.red,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
