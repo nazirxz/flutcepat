@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sicepat/shared/theme.dart';
+import '../model/Kurir.dart';
+import '../model/Pengantaran.dart';
 import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -26,6 +28,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as Map;
+    final Kurir kurir = args['kurir'];
+    final List<Pengantaran> pengantaran = args['pengantaran'];
+
     return Scaffold(
       backgroundColor: bgColor,
       body: _pages[_selectedIndex],
