@@ -1,9 +1,9 @@
 import 'DetailPengantaran.dart';
 
 class Pengantaran {
-  final int id;
+  final String id;
   final String region;
-  final int kurirId;
+  final String kurirId;
   final int jumlahPaket;
   final List<DetailPengantaran> detailPengantaran;
 
@@ -16,16 +16,16 @@ class Pengantaran {
   });
 
   factory Pengantaran.fromJson(Map<String, dynamic> json) {
-    print("Parsing Pengantaran: $json"); // Log for debugging
-    var list = json['detail_pengantaran'] as List;
-    List<DetailPengantaran> detailList = list.map((i) => DetailPengantaran.fromJson(i)).toList();
+    var detailList = json['detail_pengantaran'] as List;
+    List<DetailPengantaran> detailPengantaranList =
+    detailList.map((data) => DetailPengantaran.fromJson(data)).toList();
 
     return Pengantaran(
-      id: int.parse(json['id'].toString()), // Ensure id is parsed as int
+      id: json['id'],
       region: json['region'],
-      kurirId: int.parse(json['kurir_id'].toString()), // Ensure kurir_id is parsed as int
-      jumlahPaket: int.parse(json['jumlah_paket'].toString()), // Ensure jumlah_paket is parsed as int
-      detailPengantaran: detailList,
+      kurirId: json['kurir_id'],
+      jumlahPaket: int.parse(json['jumlah_paket']),
+      detailPengantaran: detailPengantaranList,
     );
   }
 }

@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sicepat/shared/theme.dart';
 import 'package:sicepat/widget/buttons.dart';
 import '../service/ApiService.dart';
-import '../model/Kurir.dart'; // Tetapkan referensi ke model Kurir
+import '../model/Kurir.dart'; // Adjust import path as necessary
 
 class LoginPage extends StatefulWidget {
   @override
@@ -34,11 +34,10 @@ class _LoginPageState extends State<LoginPage> {
       if (result != null && result['status'] == 'success') {
         Kurir kurir = Kurir.fromJson(result['kurir']);
 
-        Navigator.pushNamedAndRemoveUntil(
+        Navigator.pushReplacementNamed(
           context,
           '/home',
-              (route) => false,
-          arguments: {'kurir': kurir},
+          arguments: kurir,
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -52,7 +51,6 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
