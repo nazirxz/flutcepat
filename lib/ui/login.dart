@@ -3,8 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sicepat/shared/theme.dart';
 import 'package:sicepat/widget/buttons.dart';
 import '../service/ApiService.dart';
-import '../model/Kurir.dart';
-import '../model/Pengantaran.dart';
+import '../model/Kurir.dart'; // Tetapkan referensi ke model Kurir
 
 class LoginPage extends StatefulWidget {
   @override
@@ -32,17 +31,14 @@ class _LoginPageState extends State<LoginPage> {
 
       print("$result"); // Log for debugging
 
-      if (result['status'] == 'success') {
+      if (result != null && result['status'] == 'success') {
         Kurir kurir = Kurir.fromJson(result['kurir']);
-        List<Pengantaran> pengantaran = (result['pengantaran'] as List)
-            .map((e) => Pengantaran.fromJson(e))
-            .toList();
 
         Navigator.pushNamedAndRemoveUntil(
           context,
           '/home',
               (route) => false,
-          arguments: {'kurir': kurir, 'pengantaran': pengantaran},
+          arguments: {'kurir': kurir},
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -56,7 +52,6 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
   }
-
 
 
   @override

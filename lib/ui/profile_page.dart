@@ -24,7 +24,7 @@ class profile_page extends StatelessWidget {
             ),
             SizedBox(height: 16),
             Text(
-              kurir.namaLengkap,
+              kurir.namaLengkap ?? 'Unknown',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
