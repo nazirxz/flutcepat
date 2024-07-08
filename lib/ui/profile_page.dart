@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../model/Kurir.dart';
 
 class profile_page extends StatelessWidget {
@@ -8,7 +10,7 @@ class profile_page extends StatelessWidget {
     Kurir kurir = Kurir(id: 0, namaLengkap: "", nohp: "", username: "", password: "", region: "", noPolisi: "");
 
     if (args != null && args is Map<String, dynamic>) {
-      kurir = args['kurir'] as Kurir; // Pastikan argumen adalah Map dan ambil Kurir
+      kurir = args['kurir'] as Kurir;
     }
 
     return Scaffold(
@@ -22,7 +24,7 @@ class profile_page extends StatelessWidget {
             ),
             SizedBox(height: 16),
             Text(
-              kurir.namaLengkap, // Ambil nama dari objek kurir
+              kurir.namaLengkap,
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -31,13 +33,7 @@ class profile_page extends StatelessWidget {
             ),
             SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/login',
-                      (route) => false,
-                );
-              },
+              onPressed: () => _logout(context),
               icon: Icon(Icons.logout),
               label: Text('Logout'),
               style: ElevatedButton.styleFrom(
@@ -51,6 +47,18 @@ class profile_page extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('kurir'); // Hapus data kurir
+    await prefs.remove('pengantaran'); // Hapus data pengantaran
+
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/login',
+          (route) => false,
     );
   }
 }
