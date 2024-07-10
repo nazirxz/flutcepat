@@ -28,4 +28,15 @@ class Kurir {
       noPolisi: json['no_polisi'] != null ? json['no_polisi'].toString() : null,
     );
   }
+
+// Add a toJson method to your Kurir class:
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'nama_lengkap': namaLengkap,
+    'nohp': nohp,
+    'username': username,
+    'password': password,
+    'region': region,
+    'no_polisi': noPolisi,
+  };
 }

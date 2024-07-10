@@ -51,12 +51,14 @@ class ProfilePage extends StatelessWidget {
 
   void _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('kurir'); // Hapus data kurir
-    await prefs.remove('pengantaran'); // Hapus data pengantaran
+    await prefs.remove(kurir.username!); // Remove login status for the specific user
+    await prefs.remove('lastLoggedInUsername'); // Clear last logged in user
+    await prefs.remove(kurir.username!);
 
+    // Navigate to LoginPage using '/'
     Navigator.pushNamedAndRemoveUntil(
       context,
-      '/login',
+      '/',
           (route) => false,
     );
   }
