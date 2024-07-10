@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sicepat/model/Kurir.dart';
-import 'package:sicepat/ui/home_page.dart';
+import 'package:sicepat/ui/HomePage.dart';
 import 'package:sicepat/ui/login.dart';
-import 'package:sicepat/ui/profile_page.dart';
+import 'package:sicepat/ui/ProfilePage.dart';
 
 void main() {
   runApp(MyApp());

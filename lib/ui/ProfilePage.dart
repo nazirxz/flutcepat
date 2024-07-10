@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../model/Kurir.dart';
+import '../shared/theme.dart';
 
 class ProfilePage extends StatelessWidget {
   final Kurir kurir;
@@ -43,6 +45,7 @@ class ProfilePage extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: _buildBottomNavigationBar(context),
     );
   }
 
@@ -55,6 +58,41 @@ class ProfilePage extends StatelessWidget {
       context,
       '/login',
           (route) => false,
+    );
+  }
+
+  Widget _buildBottomNavigationBar(BuildContext context) {
+    return BottomNavigationBar(
+      currentIndex: 1, // Set to 1 as the profile page is the second item
+      onTap: (index) {
+        if (index == 0) {
+          Navigator.pushReplacementNamed(
+            context,
+            '/home',
+            arguments: kurir, // Pass the Kurir object back to HomePage
+          );
+        }
+      },
+      items: [
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset(
+            'assets/icon_nav_1.svg',
+            width: 24,
+            height: 24,
+            color: grayColor, // Always set the active color for the current index
+          ),
+          label: 'Rute Pengantaran',
+        ),
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset(
+            'assets/User.svg',
+            width: 24,
+            height: 24,
+            color:  redColor, // Always set the inactive color for the current index
+          ),
+          label: 'Akun',
+        ),
+      ],
     );
   }
 }
