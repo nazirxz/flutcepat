@@ -7,6 +7,7 @@ class DetailPengantaran {
   final String latitude;
   final String longitude;
   final String tanggalPengantaran;
+  final String noResi; // Tambahkan atribut no_resi
 
   DetailPengantaran({
     required this.id,
@@ -17,6 +18,7 @@ class DetailPengantaran {
     required this.latitude,
     required this.longitude,
     required this.tanggalPengantaran,
+    required this.noResi, // Inisialisasi no_resi dalam constructor
   });
 
   factory DetailPengantaran.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class DetailPengantaran {
       latitude: json['latitude'],
       longitude: json['longitude'],
       tanggalPengantaran: json['tanggal_pengantaran'],
+      noResi: json['no_resi'], // Ambil no_resi dari JSON
     );
   }
 }

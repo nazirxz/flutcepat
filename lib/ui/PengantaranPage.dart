@@ -14,8 +14,6 @@ class PengantaranPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        actions: [
-        ],
       ),
       body: _buildRutePengantaranContent(context, pengantaran),
     );
@@ -26,12 +24,14 @@ class PengantaranPage extends StatelessWidget {
       itemCount: pengantaran.length,
       itemBuilder: (context, index) {
         final item = pengantaran[index];
+        // Tentukan nomor rute untuk digunakan dalam detail pengantaran
+        int ruteNumber = index + 1;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: item.detailPengantaran.map((detail) {
             return RouteCard(
-              routeName: "Rute ${index + 1}",
-              noResi: detail.id.toString(),
+              routeName: "Rute $ruteNumber", // Gunakan nomor rute yang benar
+              noResi: detail.noResi,
               name: detail.namaPenerima,
               phone: detail.nohp,
               address: detail.alamatPenerima,

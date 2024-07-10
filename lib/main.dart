@@ -1,41 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:sicepat/model/Kurir.dart';
 import 'package:sicepat/ui/home_page.dart';
 import 'package:sicepat/ui/login.dart';
-import 'package:sicepat/ui/splash_screen.dart';
-
-import 'model/Kurir.dart';
+import 'package:sicepat/ui/profile_page.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'sicepat',
-      debugShowCheckedModeBanner: false,
-      // theme: ThemeData(
-      //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.black),
-      //   useMaterial3: true
-      // ),
+      title: 'Kurir App',
+      theme: ThemeData(
+        primarySwatch: Colors.red,
+      ),
+      initialRoute: '/',
       routes: {
-        '/': (context) => const SplashScreen(),
-        '/login': (context) => LoginPage(),
-      },
-      onGenerateRoute: (settings) {
-        if (settings.name == '/home') {
-          // Extract arguments passed via Navigator.pushNamed
-          final args = settings.arguments;
-          if (args is Kurir) {
-            return MaterialPageRoute(
-              builder: (context) => HomePage(kurir: args),
-            );
-          }
-        }
-        return null;
+        '/': (context) => LoginPage(),
+        '/home': (context) {
+          final Kurir kurir = ModalRoute.of(context)?.settings.arguments as Kurir;
+          return HomePage(kurir: kurir);
+        },
+        '/profile': (context) {
+          final Kurir kurir = ModalRoute.of(context)?.settings.arguments as Kurir;
+          return ProfilePage(kurir: kurir);
+        },
       },
     );
   }

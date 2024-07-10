@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:sicepat/model/Kurir.dart';
-import 'package:sicepat/model/Pengantaran.dart';
-import 'package:sicepat/service/ApiService.dart';
-import 'package:sicepat/shared/theme.dart';
+import '../model/Kurir.dart';
+import '../model/Pengantaran.dart';
+import '../service/ApiService.dart';
+import '../shared/theme.dart';
 import 'RouteCard.dart';
 import 'PengantaranPage.dart';
+import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
   final Kurir kurir;
@@ -16,24 +17,16 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _HomePageState extends State<HomePage> {
   List<Pengantaran> _pengantaran = [];
-
   ApiService _apiService = ApiService();
+  int _currentIndex = 0;
+  int _selectedView = 0; // 0 for Rute Pengantaran, 1 for Riwayat Pengantaran
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
     _fetchPengantaranData(widget.kurir.id.toString()); // Pass Kurir ID
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
   }
 
   void _fetchPengantaranData(String kurirId) async {
@@ -54,57 +47,109 @@ class _HomePageState extends State<HomePage>
       backgroundColor: bgColor,
       appBar: AppBar(
         title: Text('Home'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Tab(
-              text: 'Rute Pengantaran',
-            ),
-            Tab(
-              text: 'Riwayat Pengantaran',
-            ),
-          ],
+      ),
+      body: Column(
+        children: [
+          _buildButtonBar(),
+          Expanded(
+            child: _selectedView == 0
+                ? PengantaranPage(pengantaran: _pengantaran)
+                : _buildRiwayatPengantaran(),
+          ),
+        ],
+      ),
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+
+  Widget _buildButtonBar() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildTopBarButton(
+          text: 'Rute Pengantaran',
+          isSelected: _selectedView == 0,
+          onTap: () {
+            setState(() {
+              _selectedView = 0;
+            });
+          },
+        ),
+        _buildTopBarButton(
+          text: 'Riwayat Pengantaran',
+          isSelected: _selectedView == 1,
+          onTap: () {
+            setState(() {
+              _selectedView = 1;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTopBarButton({
+    required String text,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+        decoration: BoxDecoration(
+          color: isSelected ? redColor : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: isSelected ? Colors.white : redColor,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          PengantaranPage(pengantaran: _pengantaran),
-          _buildRiwayatPengantaran(),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _tabController.index,
-        selectedItemColor: redColor,
-        unselectedItemColor: grayColor,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        onTap: (index) {
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return BottomNavigationBar(
+      currentIndex: _currentIndex,
+      onTap: (index) {
+        if (index == 1) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProfilePage(kurir: widget.kurir), // Navigate to ProfilePage
+            ),
+          );
+        } else {
           setState(() {
-            _tabController.index = index;
+            _currentIndex = index;
+            _selectedView = 0; // Ensure the view switches to Rute Pengantaran
           });
-        },
-        items: [
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              'assets/icon_nav_1.svg',
-              width: 24,
-              height: 24,
-              color: _tabController.index == 0 ? redColor : grayColor,
-            ),
-            label: 'Rute Pengantaran',
+        }
+      },
+      items: [
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset(
+            'assets/icon_nav_1.svg',
+            width: 24,
+            height: 24,
+            color: _currentIndex == 0 ? redColor : grayColor,
           ),
-          BottomNavigationBarItem(
-            icon: SvgPicture.asset(
-              'assets/User.svg',
-              width: 24,
-              height: 24,
-              color: _tabController.index == 1 ? redColor : grayColor,
-            ),
-            label: 'Akun',
+          label: 'Rute Pengantaran',
+        ),
+        BottomNavigationBarItem(
+          icon: SvgPicture.asset(
+            'assets/User.svg',
+            width: 24,
+            height: 24,
+            color: _currentIndex == 1 ? redColor : grayColor,
           ),
-        ],
-      ),
+          label: 'Akun',
+        ),
+      ],
     );
   }
 

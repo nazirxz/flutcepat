@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../model/Kurir.dart';
 
-class profile_page extends StatelessWidget {
+class ProfilePage extends StatelessWidget {
+  final Kurir kurir;
+
+  const ProfilePage({Key? key, required this.kurir}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)?.settings.arguments;
-    Kurir kurir = Kurir(id: 0, namaLengkap: "", nohp: "", username: "", password: "", region: "", noPolisi: "");
-
-    if (args != null && args is Map<String, dynamic>) {
-      kurir = args['kurir'] as Kurir;
-    }
-
     return Scaffold(
       body: Center(
         child: Column(

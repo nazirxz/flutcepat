@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import '../model/Pengantaran.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.100.76:9000/';
+  static const String baseUrl = 'http://192.168.43.137:8081/';
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
     contentType: 'application/x-www-form-urlencoded', // Set for form data
