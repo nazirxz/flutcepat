@@ -53,8 +53,8 @@ class _HomePageState extends State<HomePage> {
           _buildButtonBar(),
           Expanded(
             child: _selectedView == 0
-                ? PengantaranPage(pengantaran: _pengantaran)
-                : _buildRiwayatPengantaran(),
+                ? PengantaranPage(pengantaran: _pengantaran, status: 'pending')
+                : PengantaranPage(pengantaran: _pengantaran, status: 'delivered'),
           ),
         ],
       ),
@@ -150,37 +150,6 @@ class _HomePageState extends State<HomePage> {
           label: 'Akun',
         ),
       ],
-    );
-  }
-
-  Widget _buildRiwayatPengantaran() {
-    List<DetailPengantaran> deliveredDetails = _pengantaran
-        .expand((pengantaran) => pengantaran.detailPengantaran)
-        .where((detail) => detail.status == 'delivered')
-        .toList();
-
-    if (deliveredDetails.isEmpty) {
-      return Center(
-        child: Text(
-          'Tidak ada pengantaran yang sudah dikirim.',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      itemCount: deliveredDetails.length,
-      itemBuilder: (context, index) {
-        final detail = deliveredDetails[index];
-        return ListTile(
-          title: Text(detail.namaPenerima),
-          subtitle: Text('No Resi: ${detail.noResi}'),
-          trailing: Text(
-            'Status: ${detail.status}',
-            style: TextStyle(color: Colors.green),
-          ),
-        );
-      },
     );
   }
 }

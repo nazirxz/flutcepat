@@ -6,45 +6,47 @@ import '../model/DetailPengantaran.dart';
 
 class PengantaranPage extends StatelessWidget {
   final List<Pengantaran> pengantaran;
+  final String status; // Add a status parameter
 
-  PengantaranPage({required this.pengantaran});
+  PengantaranPage({required this.pengantaran, required this.status});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: _buildRutePengantaranContent(context, pengantaran),
     );
   }
 
   Widget _buildRutePengantaranContent(BuildContext context, List<Pengantaran> pengantaran) {
-    // Filter pengantaran untuk hanya menampilkan yang statusnya "pending"
-    List<DetailPengantaran> pendingDetails = pengantaran
+    // Filter pengantaran berdasarkan status yang diberikan
+    List<DetailPengantaran> filteredDetails = pengantaran
         .expand((pengantaran) => pengantaran.detailPengantaran)
-        .where((detail) => detail.status == 'pending')
+        .where((detail) => detail.status == status)
         .toList();
 
-    if (pendingDetails.isEmpty) {
+    if (filteredDetails.isEmpty) {
       return Center(
         child: Text(
-          'Tidak ada pengantaran yang pending.',
+          status == 'pending'
+              ? 'Tidak ada pengantaran yang pending.'
+              : 'Tidak ada pengantaran yang sudah dikirim.',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       );
     }
 
     return ListView.builder(
-      itemCount: pendingDetails.length,
+      itemCount: filteredDetails.length,
       itemBuilder: (context, index) {
-        final detail = pendingDetails[index];
+        final detail = filteredDetails[index];
         int ruteNumber = index + 1;
         return RouteCard(
-          routeName: "Rute $ruteNumber", // Gunakan nomor rute yang benar
+          routeName: "Rute $ruteNumber",
           noResi: detail.noResi,
           name: detail.namaPenerima,
           phone: detail.nohp,
           address: detail.alamatPenerima,
-          bgColor: Colors.yellow[100],
+          bgColor: status == 'pending' ? Colors.yellow[100] : Colors.green[100],
         );
       },
     );
