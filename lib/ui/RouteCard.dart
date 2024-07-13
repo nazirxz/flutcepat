@@ -50,7 +50,11 @@ class RouteCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                 ),
-                child: Text("Lihat Rute"),
+                child: Text("Lihat Rute",
+                style: TextStyle(
+                  color: Colors.white
+                ),
+                ),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -60,7 +64,11 @@ class RouteCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                 ),
-                child: Text("Status Pengantaran"),
+                child: Text("Status Pengantaran",
+                  style: TextStyle(
+                      color: Colors.white
+                  ),
+                ),
               ),
             ],
           ),
