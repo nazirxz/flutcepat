@@ -46,6 +46,8 @@ class PengantaranPage extends StatelessWidget {
           name: detail.namaPenerima,
           phone: detail.nohp,
           address: detail.alamatPenerima,
+          latitude: detail.latitude,
+          longitude: detail.longitude,
           bgColor: status == 'pending' ? Colors.yellow[100] : Colors.green[100],
         );
       },

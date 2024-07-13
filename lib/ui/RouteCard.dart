@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'MapPage.dart';
 
 class RouteCard extends StatelessWidget {
@@ -8,6 +7,8 @@ class RouteCard extends StatelessWidget {
   final String name;
   final String phone;
   final String address;
+  final double latitude; // Add latitude
+  final double longitude; // Add longitude
   final Color? bgColor;
 
   RouteCard({
@@ -16,6 +17,8 @@ class RouteCard extends StatelessWidget {
     required this.name,
     required this.phone,
     required this.address,
+    required this.latitude, // Update constructor
+    required this.longitude, // Update constructor
     required this.bgColor,
   });
 
@@ -49,7 +52,11 @@ class RouteCard extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => MapPage(routeName: routeName),
+                      builder: (context) => MapPage(
+                        routeName: routeName,
+                        latitude: latitude,
+                        longitude: longitude,
+                      ),
                     ),
                   );
                 },
@@ -69,10 +76,9 @@ class RouteCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                 ),
-                child: Text("Status Pengantaran",
-                  style: TextStyle(
-                      color: Colors.white
-                  ),
+                child: Text(
+                  "Status Pengantaran",
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
             ],

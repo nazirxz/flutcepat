@@ -5,8 +5,14 @@ import 'package:permission_handler/permission_handler.dart';
 
 class MapPage extends StatefulWidget {
   final String routeName;
+  final double latitude;
+  final double longitude;
 
-  MapPage({required this.routeName});
+  MapPage({
+    required this.routeName,
+    required this.latitude,
+    required this.longitude,
+  });
 
   @override
   _MapPageState createState() => _MapPageState();
@@ -18,14 +24,12 @@ class _MapPageState extends State<MapPage> {
   LatLng? _currentLocation;
   Set<Marker> _markers = {};
 
-  final LatLng _startLocation = const LatLng(-6.2088, 106.8456); // Koordinat awal
-
   @override
   void initState() {
     super.initState();
     _markers.add(Marker(
-      markerId: MarkerId('start'),
-      position: _startLocation,
+      markerId: MarkerId('destination'),
+      position: LatLng(widget.latitude, widget.longitude),
       icon: BitmapDescriptor.defaultMarker,
     ));
     _requestLocationPermission();
@@ -60,6 +64,11 @@ class _MapPageState extends State<MapPage> {
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
+    if (_currentLocation != null) {
+      mapController.animateCamera(
+        CameraUpdate.newLatLng(_currentLocation!),
+      );
+    }
   }
 
   @override
@@ -73,11 +82,11 @@ class _MapPageState extends State<MapPage> {
           GoogleMap(
             onMapCreated: _onMapCreated,
             initialCameraPosition: CameraPosition(
-              target: _startLocation,
+              target: LatLng(widget.latitude, widget.longitude),
               zoom: 15.0,
             ),
             markers: _markers,
-            myLocationEnabled: true, // Tampilkan lokasi pengguna
+            myLocationEnabled: true,
           ),
           Positioned(
             bottom: 16,
