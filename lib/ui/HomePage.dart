@@ -3,9 +3,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sicepat/ui/ProfilePage.dart';
 import '../model/Kurir.dart';
 import '../model/Pengantaran.dart';
+import '../model/DetailPengantaran.dart'; // Import model DetailPengantaran
 import '../service/ApiService.dart';
 import '../shared/theme.dart';
 import 'PengantaranPage.dart';
+
 class HomePage extends StatefulWidget {
   final Kurir kurir;
 
@@ -152,11 +154,33 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildRiwayatPengantaran() {
-    return Center(
-      child: Text(
-        'Riwayat Pengantaran',
-        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-      ),
+    List<DetailPengantaran> deliveredDetails = _pengantaran
+        .expand((pengantaran) => pengantaran.detailPengantaran)
+        .where((detail) => detail.status == 'delivered')
+        .toList();
+
+    if (deliveredDetails.isEmpty) {
+      return Center(
+        child: Text(
+          'Tidak ada pengantaran yang sudah dikirim.',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      itemCount: deliveredDetails.length,
+      itemBuilder: (context, index) {
+        final detail = deliveredDetails[index];
+        return ListTile(
+          title: Text(detail.namaPenerima),
+          subtitle: Text('No Resi: ${detail.noResi}'),
+          trailing: Text(
+            'Status: ${detail.status}',
+            style: TextStyle(color: Colors.green),
+          ),
+        );
+      },
     );
   }
 }

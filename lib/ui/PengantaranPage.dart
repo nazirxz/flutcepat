@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../model/Pengantaran.dart';
 import '../shared/theme.dart';
 import 'RouteCard.dart';
+import '../model/DetailPengantaran.dart';
 
 class PengantaranPage extends StatelessWidget {
   final List<Pengantaran> pengantaran;
@@ -11,33 +12,39 @@ class PengantaranPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-      ),
+
       body: _buildRutePengantaranContent(context, pengantaran),
     );
   }
 
   Widget _buildRutePengantaranContent(BuildContext context, List<Pengantaran> pengantaran) {
+    // Filter pengantaran untuk hanya menampilkan yang statusnya "pending"
+    List<DetailPengantaran> pendingDetails = pengantaran
+        .expand((pengantaran) => pengantaran.detailPengantaran)
+        .where((detail) => detail.status == 'pending')
+        .toList();
+
+    if (pendingDetails.isEmpty) {
+      return Center(
+        child: Text(
+          'Tidak ada pengantaran yang pending.',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      );
+    }
+
     return ListView.builder(
-      itemCount: pengantaran.length,
+      itemCount: pendingDetails.length,
       itemBuilder: (context, index) {
-        final item = pengantaran[index];
-        // Tentukan nomor rute untuk digunakan dalam detail pengantaran
+        final detail = pendingDetails[index];
         int ruteNumber = index + 1;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: item.detailPengantaran.map((detail) {
-            return RouteCard(
-              routeName: "Rute $ruteNumber", // Gunakan nomor rute yang benar
-              noResi: detail.noResi,
-              name: detail.namaPenerima,
-              phone: detail.nohp,
-              address: detail.alamatPenerima,
-              bgColor: Colors.yellow[100],
-            );
-          }).toList(),
+        return RouteCard(
+          routeName: "Rute $ruteNumber", // Gunakan nomor rute yang benar
+          noResi: detail.noResi,
+          name: detail.namaPenerima,
+          phone: detail.nohp,
+          address: detail.alamatPenerima,
+          bgColor: Colors.yellow[100],
         );
       },
     );
