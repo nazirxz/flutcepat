@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'MapPage.dart';
+
 class RouteCard extends StatelessWidget {
   final String routeName;
   final String noResi;
@@ -44,16 +46,19 @@ class RouteCard extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  // Action to view route
-                  print('Lihat Rute: $routeName');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MapPage(routeName: routeName),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                 ),
-                child: Text("Lihat Rute",
-                style: TextStyle(
-                  color: Colors.white
-                ),
+                child: Text(
+                  "Lihat Rute",
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
               ElevatedButton(
