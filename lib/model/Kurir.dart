@@ -30,7 +30,6 @@ class Kurir {
     );
   }
 
-// Add a toJson method to your Kurir class:
   Map<String, dynamic> toJson() => {
     'id': id,
     'nama_lengkap': namaLengkap,
@@ -40,6 +39,7 @@ class Kurir {
     'region': region,
     'no_polisi': noPolisi,
   };
+
   static void resetInstance() {
     _instance = null;
   }

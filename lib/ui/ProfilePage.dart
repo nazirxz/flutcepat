@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../model/DetailPengantaran.dart';
 import '../model/Kurir.dart';
+import '../model/Pengantaran.dart';
 import '../shared/theme.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -52,15 +54,27 @@ class ProfilePage extends StatelessWidget {
   void _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear(); // Clear SharedPreferences
+
+    // Reset all necessary models
+    Kurir.resetInstance(); // Example reset for Kurir
+    DetailPengantaran.resetInstance(); // If needed for DetailPengantaran
+    Pengantaran.resetInstance(); // If needed for Pengantaran
+
     Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false); // Navigate to Login page
   }
 
   Widget _buildBottomNavigationBar(BuildContext context) {
     return BottomNavigationBar(
-      currentIndex: 1, // Set to 1 as the profile page is the second item
+      currentIndex: 0, // Set to 0 for the first item (Rute Pengantaran)
       onTap: (index) {
-        if (index == 0) {
-          Navigator.pushReplacementNamed(context, '/home');
+        switch (index) {
+          case 0:
+          // Navigate to delivery routes or another appropriate screen
+            Navigator.pushReplacementNamed(context, '/home');
+            break;
+          case 1:
+          // Stay on the current profile page (this page)
+            break;
         }
       },
       items: [
@@ -86,3 +100,4 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
+

@@ -1,6 +1,7 @@
 import 'DetailPengantaran.dart';
 
 class Pengantaran {
+  static Pengantaran? _instance;
   final String id;
   final String region;
   final String kurirId;
@@ -27,5 +28,8 @@ class Pengantaran {
       jumlahPaket: int.parse(json['jumlah_paket']),
       detailPengantaran: detailPengantaranList,
     );
+  }
+  static void resetInstance() {
+    _instance = null;
   }
 }

@@ -1,4 +1,5 @@
 class DetailPengantaran {
+  static DetailPengantaran? _instance;
   final String id;
   final String pengantaranId;
   final String namaPenerima;
@@ -36,5 +37,9 @@ class DetailPengantaran {
       noResi: json['no_resi'],
       status: json['status'],
     );
+  }
+
+  static void resetInstance() {
+    _instance = null;
   }
 }
