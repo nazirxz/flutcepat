@@ -51,16 +51,8 @@ class ProfilePage extends StatelessWidget {
 
   void _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(kurir.username!); // Remove login status for the specific user
-    await prefs.remove('lastLoggedInUsername'); // Clear last logged in user
-    await prefs.remove(kurir.username!);
-
-    // Navigate to LoginPage using '/'
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      '/',
-          (route) => false,
-    );
+    await prefs.clear(); // Clear SharedPreferences
+    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false); // Navigate to Login page
   }
 
   Widget _buildBottomNavigationBar(BuildContext context) {
@@ -68,11 +60,7 @@ class ProfilePage extends StatelessWidget {
       currentIndex: 1, // Set to 1 as the profile page is the second item
       onTap: (index) {
         if (index == 0) {
-          Navigator.pushReplacementNamed(
-            context,
-            '/home',
-            arguments: kurir, // Pass the Kurir object back to HomePage
-          );
+          Navigator.pushReplacementNamed(context, '/home');
         }
       },
       items: [
@@ -81,7 +69,7 @@ class ProfilePage extends StatelessWidget {
             'assets/icon_nav_1.svg',
             width: 24,
             height: 24,
-            color: grayColor, // Always set the active color for the current index
+            color: grayColor,
           ),
           label: 'Rute Pengantaran',
         ),
@@ -90,7 +78,7 @@ class ProfilePage extends StatelessWidget {
             'assets/User.svg',
             width: 24,
             height: 24,
-            color:  redColor, // Always set the inactive color for the current index
+            color: redColor,
           ),
           label: 'Akun',
         ),

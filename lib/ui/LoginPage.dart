@@ -1,13 +1,15 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:developer' as developer;
+import 'package:sicepat/model/Kurir.dart';
+import 'package:sicepat/service/ApiService.dart';
 import 'package:sicepat/shared/theme.dart';
 import 'package:sicepat/widget/buttons.dart';
-import '../service/ApiService.dart';
-import '../model/Kurir.dart';
+import '../ui/HomePage.dart';
+import '../ui/ProfilePage.dart';
+import 'dart:developer' as developer;
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -15,9 +17,6 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final ApiService _apiService = ApiService();
-
   Future<void> _login() async {
     String username = _usernameController.text.trim();
     String password = _passwordController.text;
@@ -39,12 +38,15 @@ class _LoginPageState extends State<LoginPage> {
         final prefs = await SharedPreferences.getInstance();
 
         await prefs.setString('lastLoggedInUsername', username);
-        await prefs.setBool(username, true);
+        await prefs.setBool('isLoggedIn', true);  // Ubah ini
 
         final kurirJson = json.encode(kurir.toJson());
-        await prefs.setString(username, kurirJson);
+        await prefs.setString('kurirData', kurirJson);  // Ubah ini
 
-        Navigator.pushReplacementNamed(context, '/home', arguments: kurir);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage(kurir: kurir)),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result['message'] ?? 'Login failed')),
@@ -57,6 +59,9 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
   }
+  final TextEditingController _passwordController = TextEditingController();
+  final ApiService _apiService = ApiService();
+
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,5 @@
 class Kurir {
+  static Kurir? _instance;
   int? id;
   String? namaLengkap;
   String? nohp;
@@ -39,4 +40,7 @@ class Kurir {
     'region': region,
     'no_polisi': noPolisi,
   };
+  static void resetInstance() {
+    _instance = null;
+  }
 }

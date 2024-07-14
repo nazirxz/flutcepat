@@ -10,18 +10,19 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
-  final lastLoggedInUsername = prefs.getString('lastLoggedInUsername');
-  final isLoggedIn = lastLoggedInUsername != null && prefs.getString(lastLoggedInUsername) != null; // Check if username exists as a key
+  final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
   Kurir? kurir;
 
-  if (isLoggedIn && lastLoggedInUsername != null) {
-    final kurirData = prefs.getString(lastLoggedInUsername);
-    if (kurirData != null) {
-      final Map<String, dynamic> kurirMap = Map<String, dynamic>.from(json.decode(kurirData));
-      kurir = Kurir.fromJson(kurirMap);
-    } else {
-      // Handle the case where kurir data is missing (e.g., logout the user)
-      await prefs.remove('lastLoggedInUsername'); // Remove the username key to log out
+  if (isLoggedIn) {
+    try {
+      final kurirData = prefs.getString('kurirData');
+      if (kurirData != null) {
+        final Map<String, dynamic> kurirMap = json.decode(kurirData);
+        kurir = Kurir.fromJson(kurirMap);
+      }
+    } catch (e) {
+      print('Error decoding Kurir data: $e');
+      kurir = null;
     }
   }
 
@@ -30,9 +31,9 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   final bool isLoggedIn;
-  final Kurir? kurir; // Make kurir nullable
+  final Kurir? kurir;
 
-  const MyApp({super.key, required this.isLoggedIn, this.kurir});
+  const MyApp({Key? key, required this.isLoggedIn, this.kurir}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +45,8 @@ class MyApp extends StatelessWidget {
       initialRoute: isLoggedIn ? '/home' : '/',
       routes: {
         '/': (context) => LoginPage(),
-        '/home': (context) => kurir != null ? HomePage(kurir: kurir!) : LoginPage(),  // Check if kurir is not null
-        '/profile': (context) => kurir != null ? ProfilePage(kurir: kurir!) : LoginPage(), // Check if kurir is not null
+        '/home': (context) => isLoggedIn && kurir != null ? HomePage(kurir: kurir!) : LoginPage(),
+        '/profile': (context) => isLoggedIn && kurir != null ? ProfilePage(kurir: kurir!) : LoginPage(),
       },
     );
   }
