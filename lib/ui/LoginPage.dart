@@ -37,12 +37,16 @@ class _LoginPageState extends State<LoginPage> {
         Kurir kurir = Kurir.fromJson(result['kurir']);
         final prefs = await SharedPreferences.getInstance();
 
+        // Clear previous user data
+        await prefs.remove('kurirData');
         await prefs.setString('lastLoggedInUsername', username);
-        await prefs.setBool('isLoggedIn', true);  // Ubah ini
+        await prefs.setBool('isLoggedIn', true);
 
+        // Store new user data
         final kurirJson = json.encode(kurir.toJson());
-        await prefs.setString('kurirData', kurirJson);  // Ubah ini
+        await prefs.setString('kurirData', kurirJson);
 
+        // Navigate to home page with new user data
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomePage(kurir: kurir)),
@@ -59,6 +63,7 @@ class _LoginPageState extends State<LoginPage> {
       );
     }
   }
+
   final TextEditingController _passwordController = TextEditingController();
   final ApiService _apiService = ApiService();
 
