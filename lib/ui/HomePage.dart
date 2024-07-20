@@ -56,12 +56,12 @@ class _HomePageState extends State<HomePage> {
                 ? PengantaranPage(
               pengantaran: _pengantaran,
               status: 'pending',
-              kurirId: widget.kurir.id!, // Use Kurir ID
+              kurirId: widget.kurir.id!.toString(), // Convert int to String
             )
                 : PengantaranPage(
               pengantaran: _pengantaran,
               status: 'delivered',
-              kurirId: widget.kurir.id!, // Use Kurir ID
+              kurirId: widget.kurir.id!.toString(), // Convert int to String
             ),
           ),
         ],

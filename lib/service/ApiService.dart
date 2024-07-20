@@ -2,15 +2,15 @@ import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:convert';
 
-import '../model/Pengantaran.dart'; // For json decoding
+import '../model/Pengantaran.dart';
 
 class ApiService {
   static const String baseUrl = 'http://192.168.100.76:8080/';
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
-    contentType: 'application/x-www-form-urlencoded', // Set for form data
+    contentType: 'application/x-www-form-urlencoded',
   ));
-  final String googleApiKey = 'AIzaSyC-S0PiFJUQ12lQUmPfg1QWPKzWwLg-JdU'; // Replace with your actual API key
+  final String googleApiKey = 'AIzaSyC-S0PiFJUQ12lQUmPfg1QWPKzWwLg-JdU';
 
   Future<Map<String, dynamic>> login(String username, String password) async {
     try {
@@ -23,7 +23,7 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        return response.data; // Return response data if successful
+        return response.data;
       } else {
         throw Exception('Failed to login with status code: ${response.statusCode}');
       }
@@ -61,13 +61,11 @@ class ApiService {
         final data = response.data;
         final List<dynamic> routePoints = data['optimal_route'];
 
-        // Extract waypoints from the API response
         List<LatLng> waypoints = routePoints.map((point) => LatLng(
             double.parse(point['lat']),
             double.parse(point['lon'])
         )).toList();
 
-        // Get detailed route using Google Directions API
         return await _getRouteFromGoogleDirectionsApi(waypoints);
       } else {
         throw Exception('Failed to fetch optimal route with status code: ${response.statusCode}');
@@ -80,10 +78,8 @@ class ApiService {
   Future<List<LatLng>> _getRouteFromGoogleDirectionsApi(List<LatLng> waypoints) async {
     if (waypoints.isEmpty) return [];
 
-    // Construct the waypoints string for the Directions API request
     String waypointsString = waypoints.skip(1).map((point) => '${point.latitude},${point.longitude}').join('|');
 
-    // Build the URL for the Directions API request
     String url = 'https://maps.googleapis.com/maps/api/directions/json'
         '?origin=${waypoints.first.latitude},${waypoints.first.longitude}'
         '&destination=${waypoints.last.latitude},${waypoints.last.longitude}'
@@ -97,7 +93,6 @@ class ApiService {
         final data = response.data;
 
         if (data['status'] == 'OK') {
-          // Extract the polyline points from the Directions API response
           List<LatLng> routePoints = [];
           var steps = data['routes'][0]['legs'][0]['steps'];
           for (var step in steps) {
@@ -144,5 +139,23 @@ class ApiService {
       polyline.add(LatLng(lat / 1E5, lng / 1E5));
     }
     return polyline;
+  }
+
+  Future<void> updateDetailPengantaranStatus(String detailPengantaranId, String status) async {
+    try {
+      final response = await _dio.post(
+        'api/pengantaran/update-status',
+        data: FormData.fromMap({
+          'id': detailPengantaranId,
+          'status': status,
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to update pengantaran status with status code: ${response.statusCode}');
+      }
+    } on DioError catch (e) {
+      throw Exception('Network error: ${e.message}');
+    }
   }
 }

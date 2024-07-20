@@ -3,11 +3,11 @@ import '../model/Pengantaran.dart';
 import '../shared/theme.dart';
 import 'RouteCard.dart';
 import '../model/DetailPengantaran.dart';
-import '../model/Kurir.dart';
+
 class PengantaranPage extends StatelessWidget {
   final List<Pengantaran> pengantaran;
   final String status;
-  final int kurirId; // Ubah dari objek Kurir menjadi kurirId
+  final String kurirId; // Ubah tipe data menjadi String untuk konsistensi
 
   PengantaranPage({
     required this.pengantaran,
@@ -54,6 +54,7 @@ class PengantaranPage extends StatelessWidget {
           longitude: detail.longitude,
           kurirId: kurirId,
           bgColor: status == 'pending' ? Colors.yellow[100] : Colors.green[100],
+          detailPengantaran: detail, // Tambahkan ini
         );
       },
     );

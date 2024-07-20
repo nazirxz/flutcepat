@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'MapPage.dart';
+import 'package:sicepat/model/DetailPengantaran.dart';
 
 class RouteCard extends StatelessWidget {
   final String routeName;
@@ -9,8 +10,9 @@ class RouteCard extends StatelessWidget {
   final String address;
   final double latitude;
   final double longitude;
-  final int kurirId; // Ubah tipe data menjadi int
+  final String kurirId;
   final Color? bgColor;
+  final DetailPengantaran detailPengantaran;
 
   RouteCard({
     required this.routeName,
@@ -22,6 +24,7 @@ class RouteCard extends StatelessWidget {
     required this.longitude,
     required this.kurirId,
     required this.bgColor,
+    required this.detailPengantaran,
   });
 
   @override
@@ -58,7 +61,8 @@ class RouteCard extends StatelessWidget {
                         routeName: routeName,
                         latitude: latitude,
                         longitude: longitude,
-                        kurirId: kurirId.toString(),
+                        kurirId: kurirId,
+                        detailPengantaran: detailPengantaran,
                       ),
                     ),
                   );
@@ -74,7 +78,7 @@ class RouteCard extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   // Action to view delivery status
-                  print('Status Pengantaran: $routeName');
+                  print('Status Pengantaran: ${detailPengantaran.status}');
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,

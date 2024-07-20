@@ -3,19 +3,22 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:math';
-import 'package:sicepat/service/ApiService.dart'; // Sesuaikan dengan path yang benar
+import 'package:sicepat/service/ApiService.dart';
+import 'package:sicepat/model/DetailPengantaran.dart';
 
 class MapPage extends StatefulWidget {
   final String routeName;
   final double latitude;
   final double longitude;
   final String kurirId;
+  final DetailPengantaran detailPengantaran;
 
   MapPage({
     required this.routeName,
     required this.latitude,
     required this.longitude,
     required this.kurirId,
+    required this.detailPengantaran,
   });
 
   @override
@@ -118,7 +121,6 @@ class _MapPageState extends State<MapPage> {
           width: 5,
         ));
 
-        // Tambahkan marker hanya untuk titik awal dan akhir
         _markers.clear();
         _markers.add(Marker(
           markerId: MarkerId('currentLocation'),
@@ -132,7 +134,6 @@ class _MapPageState extends State<MapPage> {
         ));
       });
 
-      // Sesuaikan kamera untuk menampilkan seluruh rute
       LatLngBounds bounds = _getBounds(routePoints);
       mapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
     } catch (e) {
@@ -161,6 +162,63 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
+  void _showUpdateDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Update Pengantaran'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                child: Text('Delivered'),
+                onPressed: () {
+                  _updatePengantaranStatus('delivered');
+                  Navigator.of(context).pop();
+                },
+              ),
+              SizedBox(height: 10),
+              ElevatedButton(
+                child: Text('Barang dikembalikan (pending)'),
+                onPressed: () {
+                  _updatePengantaranStatus('pending');
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _updatePengantaranStatus(String status) async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _apiService.updateDetailPengantaranStatus(
+          widget.detailPengantaran.id,
+          status
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Status pengantaran berhasil diperbarui')),
+      );
+    } catch (e) {
+      print('Error updating pengantaran status: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memperbarui status pengantaran')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -182,7 +240,7 @@ class _MapPageState extends State<MapPage> {
           if (_isLoading)
             Center(child: CircularProgressIndicator()),
           Positioned(
-            bottom: 16,
+            bottom: 70,
             left: 16,
             right: 16,
             child: ElevatedButton(
@@ -192,6 +250,21 @@ class _MapPageState extends State<MapPage> {
               ),
               child: Text(
                 'Tentukan Jarak Rute',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 16,
+            left: 16,
+            right: 16,
+            child: ElevatedButton(
+              onPressed: _showUpdateDialog,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+              ),
+              child: Text(
+                'Update Pengantaran',
                 style: TextStyle(color: Colors.white),
               ),
             ),
