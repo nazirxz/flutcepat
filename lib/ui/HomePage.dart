@@ -3,7 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sicepat/ui/ProfilePage.dart';
 import '../model/Kurir.dart';
 import '../model/Pengantaran.dart';
-import '../model/DetailPengantaran.dart'; // Import model DetailPengantaran
 import '../service/ApiService.dart';
 import '../shared/theme.dart';
 import 'PengantaranPage.dart';
@@ -19,27 +18,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Pengantaran> _pengantaran = [];
-  ApiService _apiService = ApiService();
+  final ApiService _apiService = ApiService();
   int _currentIndex = 0;
   int _selectedView = 0; // 0 for Rute Pengantaran, 1 for Riwayat Pengantaran
 
   @override
-  @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args = ModalRoute.of(context)?.settings.arguments;
-      if (args is Map && args['refresh'] == true) {
-        _fetchPengantaranData(widget.kurir.id.toString());
-      } else {
-        _fetchPengantaranData(widget.kurir.id.toString());
-      }
-    });
+    _fetchPengantaranData(widget.kurir.id.toString());
   }
 
-  void _fetchPengantaranData(String kurirId) async {
+  Future<void> _fetchPengantaranData(String kurirId) async {
     try {
-      List<Pengantaran> pengantarans = await _apiService.getPengantaranByKurir(kurirId);
+      final List<Pengantaran> pengantarans = await _apiService.getPengantaranByKurir(kurirId);
       setState(() {
         _pengantaran = pengantarans;
       });
@@ -49,6 +40,9 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _handleRefresh() async {
+    await _fetchPengantaranData(widget.kurir.id.toString());
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,23 +50,21 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text('Home'),
       ),
-      body: Column(
-        children: [
-          _buildButtonBar(),
-          Expanded(
-            child: _selectedView == 0
-                ? PengantaranPage(
-              pengantaran: _pengantaran,
-              status: 'pending',
-              kurirId: widget.kurir.id!.toString(), // Convert int to String
-            )
-                : PengantaranPage(
-              pengantaran: _pengantaran,
-              status: 'delivered',
-              kurirId: widget.kurir.id!.toString(), // Convert int to String
+      body: RefreshIndicator(
+        onRefresh: _handleRefresh,
+        child: Column(
+          children: [
+            _buildButtonBar(),
+            Expanded(
+              child: PengantaranPage(
+                pengantaran: _pengantaran,
+                status: _selectedView == 0 ? 'pending' : 'delivered',
+                kurirId: widget.kurir.id.toString(), // Convert int to String
+                onRefreshData: _handleRefresh, // Ensure this is a valid Future<void> Function()
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
@@ -136,7 +128,7 @@ class _HomePageState extends State<HomePage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => ProfilePage(kurir: widget.kurir), // Navigate to ProfilePage
+              builder: (context) => ProfilePage(kurir: widget.kurir),
             ),
           );
         } else {

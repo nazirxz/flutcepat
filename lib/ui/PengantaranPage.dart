@@ -7,18 +7,26 @@ import '../model/DetailPengantaran.dart';
 class PengantaranPage extends StatelessWidget {
   final List<Pengantaran> pengantaran;
   final String status;
-  final String kurirId; // Ubah tipe data menjadi String untuk konsistensi
+  final String kurirId;
+  final Future<void> Function()? onRefreshData;
 
   PengantaranPage({
     required this.pengantaran,
     required this.status,
-    required this.kurirId
+    required this.kurirId,
+    this.onRefreshData,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _buildRutePengantaranContent(context, pengantaran),
+    return RefreshIndicator(
+      onRefresh: () async {
+        // Panggil callback untuk menyegarkan data tanpa parameter
+        if (onRefreshData != null) {
+          await onRefreshData!();
+        }
+      },
+      child: _buildRutePengantaranContent(context, pengantaran),
     );
   }
 
@@ -54,7 +62,7 @@ class PengantaranPage extends StatelessWidget {
           longitude: detail.longitude,
           kurirId: kurirId,
           bgColor: status == 'pending' ? Colors.yellow[100] : Colors.green[100],
-          detailPengantaran: detail, // Tambahkan ini
+          detailPengantaran: detail,
         );
       },
     );
