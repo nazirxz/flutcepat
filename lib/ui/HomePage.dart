@@ -24,9 +24,17 @@ class _HomePageState extends State<HomePage> {
   int _selectedView = 0; // 0 for Rute Pengantaran, 1 for Riwayat Pengantaran
 
   @override
+  @override
   void initState() {
     super.initState();
-    _fetchPengantaranData(widget.kurir.id.toString()); // Pass Kurir ID
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is Map && args['refresh'] == true) {
+        _fetchPengantaranData(widget.kurir.id.toString());
+      } else {
+        _fetchPengantaranData(widget.kurir.id.toString());
+      }
+    });
   }
 
   void _fetchPengantaranData(String kurirId) async {

@@ -192,7 +192,6 @@ class _MapPageState extends State<MapPage> {
       },
     );
   }
-
   void _updatePengantaranStatus(String status) async {
     setState(() {
       _isLoading = true;
@@ -206,6 +205,13 @@ class _MapPageState extends State<MapPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Status pengantaran berhasil diperbarui')),
+      );
+
+      // Kembali ke halaman home dengan flag refresh
+      Navigator.of(context).pushNamedAndRemoveUntil(
+          '/home',
+              (Route<dynamic> route) => false,
+          arguments: {'refresh': true}
       );
     } catch (e) {
       print('Error updating pengantaran status: $e');
