@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sicepat/model/Kurir.dart';
@@ -45,8 +46,18 @@ class MyApp extends StatelessWidget {
       initialRoute: isLoggedIn ? '/home' : '/',
       routes: {
         '/': (context) => LoginPage(),
-        '/home': (context) => isLoggedIn && kurir != null ? HomePage(kurir: kurir!) : LoginPage(),
-        '/profile': (context) => isLoggedIn && kurir != null ? ProfilePage(kurir: kurir!) : LoginPage(),
+        '/home': (context) => isLoggedIn && kurir != null
+            ? HomePage(kurir: kurir!)
+            : LoginPage(),
+        '/profile': (context) => isLoggedIn && kurir != null
+            ? ProfilePage(kurir: kurir!)
+            : LoginPage(),
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/home' && !isLoggedIn) {
+          return MaterialPageRoute(builder: (context) => LoginPage());
+        }
+        return null;
       },
     );
   }
