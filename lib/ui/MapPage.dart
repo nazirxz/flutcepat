@@ -134,6 +134,7 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+
   LatLngBounds _getBounds(List<LatLng> points) {
     double? minLat, maxLat, minLng, maxLng;
     for (LatLng point in points) {
