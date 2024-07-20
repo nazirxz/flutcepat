@@ -34,11 +34,6 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    _markers.add(Marker(
-      markerId: MarkerId('destination'),
-      position: LatLng(widget.latitude, widget.longitude),
-      icon: BitmapDescriptor.defaultMarker,
-    ));
     _requestLocationPermission();
   }
 
@@ -59,11 +54,7 @@ class _MapPageState extends State<MapPage> {
       var currentLocation = await location.getLocation();
       setState(() {
         _currentLocation = LatLng(currentLocation.latitude!, currentLocation.longitude!);
-        _markers.add(Marker(
-          markerId: MarkerId('currentLocation'),
-          position: _currentLocation!,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-        ));
+        _addMarkers();
       });
     } catch (e) {
       print('Error getting current location: $e');
@@ -71,6 +62,24 @@ class _MapPageState extends State<MapPage> {
         SnackBar(content: Text('Gagal mendapatkan lokasi saat ini')),
       );
     }
+  }
+
+  void _addMarkers() {
+    setState(() {
+      _markers.clear();
+      if (_currentLocation != null) {
+        _markers.add(Marker(
+          markerId: MarkerId('currentLocation'),
+          position: _currentLocation!,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        ));
+      }
+      _markers.add(Marker(
+        markerId: MarkerId('destination'),
+        position: LatLng(widget.latitude, widget.longitude),
+        icon: BitmapDescriptor.defaultMarker,
+      ));
+    });
   }
 
   void _onMapCreated(GoogleMapController controller) {
@@ -109,14 +118,18 @@ class _MapPageState extends State<MapPage> {
           width: 5,
         ));
 
-        // Tambahkan marker untuk setiap titik pengantaran
-        for (int i = 1; i < routePoints.length; i++) {
-          _markers.add(Marker(
-            markerId: MarkerId('point_$i'),
-            position: routePoints[i],
-            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-          ));
-        }
+        // Tambahkan marker hanya untuk titik awal dan akhir
+        _markers.clear();
+        _markers.add(Marker(
+          markerId: MarkerId('currentLocation'),
+          position: _currentLocation!,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        ));
+        _markers.add(Marker(
+          markerId: MarkerId('destination'),
+          position: LatLng(widget.latitude, widget.longitude),
+          icon: BitmapDescriptor.defaultMarker,
+        ));
       });
 
       // Sesuaikan kamera untuk menampilkan seluruh rute
@@ -133,7 +146,6 @@ class _MapPageState extends State<MapPage> {
       });
     }
   }
-
 
   LatLngBounds _getBounds(List<LatLng> points) {
     double? minLat, maxLat, minLng, maxLng;
