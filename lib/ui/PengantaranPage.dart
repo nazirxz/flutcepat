@@ -3,12 +3,17 @@ import '../model/Pengantaran.dart';
 import '../shared/theme.dart';
 import 'RouteCard.dart';
 import '../model/DetailPengantaran.dart';
-
+import '../model/Kurir.dart';
 class PengantaranPage extends StatelessWidget {
   final List<Pengantaran> pengantaran;
-  final String status; // Add a status parameter
+  final String status;
+  final int kurirId; // Ubah dari objek Kurir menjadi kurirId
 
-  PengantaranPage({required this.pengantaran, required this.status});
+  PengantaranPage({
+    required this.pengantaran,
+    required this.status,
+    required this.kurirId
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +23,6 @@ class PengantaranPage extends StatelessWidget {
   }
 
   Widget _buildRutePengantaranContent(BuildContext context, List<Pengantaran> pengantaran) {
-    // Filter pengantaran berdasarkan status yang diberikan
     List<DetailPengantaran> filteredDetails = pengantaran
         .expand((pengantaran) => pengantaran.detailPengantaran)
         .where((detail) => detail.status == status)
@@ -48,6 +52,7 @@ class PengantaranPage extends StatelessWidget {
           address: detail.alamatPenerima,
           latitude: detail.latitude,
           longitude: detail.longitude,
+          kurirId: kurirId,
           bgColor: status == 'pending' ? Colors.yellow[100] : Colors.green[100],
         );
       },

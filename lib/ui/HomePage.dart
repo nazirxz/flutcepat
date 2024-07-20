@@ -7,6 +7,7 @@ import '../model/DetailPengantaran.dart'; // Import model DetailPengantaran
 import '../service/ApiService.dart';
 import '../shared/theme.dart';
 import 'PengantaranPage.dart';
+
 class HomePage extends StatefulWidget {
   final Kurir kurir;
 
@@ -52,8 +53,16 @@ class _HomePageState extends State<HomePage> {
           _buildButtonBar(),
           Expanded(
             child: _selectedView == 0
-                ? PengantaranPage(pengantaran: _pengantaran, status: 'pending')
-                : PengantaranPage(pengantaran: _pengantaran, status: 'delivered'),
+                ? PengantaranPage(
+              pengantaran: _pengantaran,
+              status: 'pending',
+              kurirId: widget.kurir.id!, // Use Kurir ID
+            )
+                : PengantaranPage(
+              pengantaran: _pengantaran,
+              status: 'delivered',
+              kurirId: widget.kurir.id!, // Use Kurir ID
+            ),
           ),
         ],
       ),

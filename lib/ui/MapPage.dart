@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:math';
+import 'package:sicepat/service/ApiService.dart'; // Sesuaikan dengan path yang benar
 
 class MapPage extends StatefulWidget {
   final String routeName;
   final double latitude;
   final double longitude;
+  final String kurirId;
 
   MapPage({
     required this.routeName,
     required this.latitude,
     required this.longitude,
+    required this.kurirId,
   });
 
   @override
@@ -23,6 +27,9 @@ class _MapPageState extends State<MapPage> {
   Location location = Location();
   LatLng? _currentLocation;
   Set<Marker> _markers = {};
+  Set<Polyline> _polylines = {};
+  bool _isLoading = false;
+  final ApiService _apiService = ApiService();
 
   @override
   void initState() {
@@ -40,8 +47,10 @@ class _MapPageState extends State<MapPage> {
     if (status.isGranted) {
       _getCurrentLocation();
     } else {
-      // Handle case when permission is denied
       print('Permission denied');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Izin lokasi diperlukan untuk fitur ini')),
+      );
     }
   }
 
@@ -58,7 +67,9 @@ class _MapPageState extends State<MapPage> {
       });
     } catch (e) {
       print('Error getting current location: $e');
-      // Handle error here
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal mendapatkan lokasi saat ini')),
+      );
     }
   }
 
@@ -69,6 +80,72 @@ class _MapPageState extends State<MapPage> {
         CameraUpdate.newLatLng(_currentLocation!),
       );
     }
+  }
+
+  void _determineRoute() async {
+    if (_currentLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lokasi saat ini tidak tersedia')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      List<LatLng> routePoints = await _apiService.getOptimalRoute(
+          int.parse(widget.kurirId),
+          _currentLocation!.latitude,
+          _currentLocation!.longitude
+      );
+
+      setState(() {
+        _polylines.add(Polyline(
+          polylineId: PolylineId('optimumRoute'),
+          points: routePoints,
+          color: Colors.blue,
+          width: 5,
+        ));
+
+        // Tambahkan marker untuk setiap titik pengantaran
+        for (int i = 1; i < routePoints.length; i++) {
+          _markers.add(Marker(
+            markerId: MarkerId('point_$i'),
+            position: routePoints[i],
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          ));
+        }
+      });
+
+      // Sesuaikan kamera untuk menampilkan seluruh rute
+      LatLngBounds bounds = _getBounds(routePoints);
+      mapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
+    } catch (e) {
+      print('Error getting optimal route: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal mendapatkan rute optimal')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  LatLngBounds _getBounds(List<LatLng> points) {
+    double? minLat, maxLat, minLng, maxLng;
+    for (LatLng point in points) {
+      minLat = minLat == null ? point.latitude : min(minLat, point.latitude);
+      maxLat = maxLat == null ? point.latitude : max(maxLat, point.latitude);
+      minLng = minLng == null ? point.longitude : min(minLng, point.longitude);
+      maxLng = maxLng == null ? point.longitude : max(maxLng, point.longitude);
+    }
+    return LatLngBounds(
+      southwest: LatLng(minLat!, minLng!),
+      northeast: LatLng(maxLat!, maxLng!),
+    );
   }
 
   @override
@@ -86,22 +163,22 @@ class _MapPageState extends State<MapPage> {
               zoom: 15.0,
             ),
             markers: _markers,
+            polylines: _polylines,
             myLocationEnabled: true,
           ),
+          if (_isLoading)
+            Center(child: CircularProgressIndicator()),
           Positioned(
             bottom: 16,
             left: 16,
             right: 16,
             child: ElevatedButton(
-              onPressed: () {
-                // Replace with your upload logic
-                print('Upload Bukti');
-              },
+              onPressed: _determineRoute,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
               ),
               child: Text(
-                'Upload Bukti',
+                'Tentukan Jarak Rute',
                 style: TextStyle(color: Colors.white),
               ),
             ),

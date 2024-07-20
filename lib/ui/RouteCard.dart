@@ -7,8 +7,9 @@ class RouteCard extends StatelessWidget {
   final String name;
   final String phone;
   final String address;
-  final double latitude; // Add latitude
-  final double longitude; // Add longitude
+  final double latitude;
+  final double longitude;
+  final int kurirId; // Ubah tipe data menjadi int
   final Color? bgColor;
 
   RouteCard({
@@ -17,8 +18,9 @@ class RouteCard extends StatelessWidget {
     required this.name,
     required this.phone,
     required this.address,
-    required this.latitude, // Update constructor
-    required this.longitude, // Update constructor
+    required this.latitude,
+    required this.longitude,
+    required this.kurirId,
     required this.bgColor,
   });
 
@@ -56,6 +58,7 @@ class RouteCard extends StatelessWidget {
                         routeName: routeName,
                         latitude: latitude,
                         longitude: longitude,
+                        kurirId: kurirId.toString(),
                       ),
                     ),
                   );
