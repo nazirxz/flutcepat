@@ -6,6 +6,7 @@ import 'package:sicepat/model/Kurir.dart';
 import 'package:sicepat/ui/HomePage.dart';
 import 'package:sicepat/ui/LoginPage.dart';
 import 'package:sicepat/ui/ProfilePage.dart';
+import 'package:sicepat/ui/BuktiPengantaranPage.dart'; // Import the new page
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,10 +21,12 @@ void main() async {
       if (kurirData != null) {
         final Map<String, dynamic> kurirMap = json.decode(kurirData);
         kurir = Kurir.fromJson(kurirMap);
+      } else {
+        kurir = null; // Handle the case where kurirData is null
       }
     } catch (e) {
       print('Error decoding Kurir data: $e');
-      kurir = null;
+      kurir = null; // Handle decoding error
     }
   }
 
@@ -52,11 +55,13 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => isLoggedIn && kurir != null
             ? ProfilePage(kurir: kurir!)
             : LoginPage(),
+        '/bukti': (context) => BuktiPengantaranPage(), // Add the route for BuktiPengantaranPage
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/home' && !isLoggedIn) {
           return MaterialPageRoute(builder: (context) => LoginPage());
         }
+        // Handle other routes or return null if not matched
         return null;
       },
     );

@@ -174,16 +174,16 @@ class _MapPageState extends State<MapPage> {
               ElevatedButton(
                 child: Text('Delivered'),
                 onPressed: () {
-                  _updatePengantaranStatus('delivered');
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Close the dialog
+                  _updatePengantaranStatus('delivered'); // Update status and navigate
                 },
               ),
               SizedBox(height: 10),
               ElevatedButton(
                 child: Text('Barang dikembalikan (pending)'),
                 onPressed: () {
-                  _updatePengantaranStatus('pending');
-                  Navigator.of(context).pop();
+                  Navigator.of(context).pop(); // Close the dialog
+                  _updatePengantaranStatus('pending'); // Update status and navigate
                 },
               ),
             ],
@@ -192,6 +192,7 @@ class _MapPageState extends State<MapPage> {
       },
     );
   }
+
   void _updatePengantaranStatus(String status) async {
     setState(() {
       _isLoading = true;
@@ -207,12 +208,19 @@ class _MapPageState extends State<MapPage> {
         SnackBar(content: Text('Status pengantaran berhasil diperbarui')),
       );
 
-      // Kembali ke halaman home dengan flag refresh
-      Navigator.of(context).pushNamedAndRemoveUntil(
-          '/home',
+      // Navigate based on status
+      if (status == 'delivered') {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/bukti',
               (Route<dynamic> route) => false,
-          arguments: {'refresh': true}
-      );
+        );
+      } else {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+            '/home',
+                (Route<dynamic> route) => false,
+            arguments: {'refresh': true}
+        );
+      }
     } catch (e) {
       print('Error updating pengantaran status: $e');
       ScaffoldMessenger.of(context).showSnackBar(

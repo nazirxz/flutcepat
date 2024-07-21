@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:convert';
+import 'dart:io'; // For File
+import 'package:http_parser/http_parser.dart'; // For MediaType
+import '../model/Pengantaran.dart';
 
 import '../model/Pengantaran.dart';
 
@@ -8,7 +11,7 @@ class ApiService {
   static const String baseUrl = 'http://192.168.43.137:8080/';
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
-    contentType: 'application/x-www-form-urlencoded',
+    contentType: 'multipart/form-data',
   ));
   final String googleApiKey = 'AIzaSyC-S0PiFJUQ12lQUmPfg1QWPKzWwLg-JdU';
 
@@ -158,4 +161,46 @@ class ApiService {
       throw Exception('Network error: ${e.message}');
     }
   }
+  Future<void> uploadBuktiPengantaran({
+    required String tanggalTerima,
+    required String waktu,
+    required String keterangan,
+    required File gambar,
+  }) async {
+    final String url = '${baseUrl}api/bukti';
+
+    try {
+      final formData = FormData.fromMap({
+        'tanggal_terima': tanggalTerima,
+        'waktu': waktu,
+        'keterangan': keterangan,
+        'gambar': await MultipartFile.fromFile(
+          gambar.path,
+          filename: gambar.path.split('/').last,
+          contentType: MediaType('image', 'jpeg'),
+        ),
+      });
+
+      final response = await _dio.post(url, data: formData);
+
+      // Hapus pengecekan status code 200
+      final responseData = response.data;
+      if (responseData['status'] == 'success') {
+        print('Bukti pengantaran berhasil dikirim');
+        return;
+      } else {
+        final errorMessage = responseData['message'] ?? 'Unknown error';
+        print('Gagal mengirim bukti pengantaran: $errorMessage');
+        throw Exception('Failed to upload image: $errorMessage');
+      }
+    } on DioError catch (e) {
+      if (e.response != null) {
+        print('Error details: ${e.response!.data}');
+      } else {
+        print('Network error: ${e.message}');
+      }
+      throw Exception('Network error: ${e.message}');
+    }
+  }
+
 }
