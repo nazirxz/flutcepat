@@ -5,7 +5,7 @@ import 'dart:convert';
 import '../model/Pengantaran.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.100.76:8080/';
+  static const String baseUrl = 'http://192.168.43.137:8080/';
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
     contentType: 'application/x-www-form-urlencoded',

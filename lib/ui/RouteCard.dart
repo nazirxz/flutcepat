@@ -13,6 +13,8 @@ class RouteCard extends StatelessWidget {
   final String kurirId;
   final Color? bgColor;
   final DetailPengantaran detailPengantaran;
+  final double distance;
+  final bool showRouteButton; // Add this parameter
 
   RouteCard({
     required this.routeName,
@@ -25,72 +27,66 @@ class RouteCard extends StatelessWidget {
     required this.kurirId,
     required this.bgColor,
     required this.detailPengantaran,
+    required this.distance,  // Add this parameter
+    required this.showRouteButton, // Add this parameter
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Card(
       margin: EdgeInsets.all(16),
-      padding: EdgeInsets.all(16),
       color: bgColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            routeName,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              routeName,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          Text("No Resi: $noResi"),
-          SizedBox(height: 8),
-          Text("Nama: $name"),
-          Text("No HP: $phone"),
-          Text("Alamat: $address"),
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MapPage(
-                        routeName: routeName,
-                        latitude: latitude,
-                        longitude: longitude,
-                        kurirId: kurirId,
-                        detailPengantaran: detailPengantaran,
-                      ),
+            Text("No Resi: $noResi"),
+            SizedBox(height: 8),
+            Text("Nama: $name"),
+            Text("No HP: $phone"),
+            Text("Alamat: $address"),
+            SizedBox(height: 8),
+            Text("Jarak: ${distance.toStringAsFixed(2)} km"),  // Display the distance
+            SizedBox(height: 8),
+            if (showRouteButton)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MapPage(
+                            routeName: routeName,
+                            latitude: latitude,
+                            longitude: longitude,
+                            kurirId: kurirId,
+                            detailPengantaran: detailPengantaran,
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
                     ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                ),
-                child: Text(
-                  "Lihat Rute",
-                  style: TextStyle(color: Colors.white),
-                ),
+                    child: Text(
+                      "Lihat Rute",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
-              ElevatedButton(
-                onPressed: () {
-                  // Action to view delivery status
-                  print('Status Pengantaran: ${detailPengantaran.status}');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                ),
-                child: Text(
-                  "Status Pengantaran",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
