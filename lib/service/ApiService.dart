@@ -8,7 +8,7 @@ import '../model/Pengantaran.dart';
 import '../model/Pengantaran.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.43.137:8080/';
+  static const String baseUrl = 'https://sicepat-pysk-e89b5ce47713.herokuapp.com/';
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
     contentType: 'multipart/form-data',

@@ -74,7 +74,6 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,11 +128,6 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
                   ElevatedButton(
                     onPressed: () => _pickImage(ImageSource.camera),
                     child: Text('Ambil Foto'),
-                  ),
-                  SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: () => _pickImage(ImageSource.gallery),
-                    child: Text('Pilih dari Galeri'),
                   ),
                 ],
               ),
