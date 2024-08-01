@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../model/DetailPengantaran.dart';
 import '../model/Kurir.dart';
-import '../model/Pengantaran.dart';
 import '../shared/theme.dart';
+import '../util/user_data_manager.dart';
+import 'HomePage.dart';
 
 class ProfilePage extends StatelessWidget {
   final Kurir kurir;
@@ -52,30 +51,22 @@ class ProfilePage extends StatelessWidget {
   }
 
   void _logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear(); // Clear SharedPreferences
-
-    // Reset all necessary models
-    Kurir.resetInstance(); // Example reset for Kurir
-    DetailPengantaran.resetInstance(); // If needed for DetailPengantaran
-    Pengantaran.resetInstance(); // If needed for Pengantaran
-
-    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false); // Navigate to Login page
+    await UserDataManager.clearUserData();
+    Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
   }
 
   Widget _buildBottomNavigationBar(BuildContext context) {
     return BottomNavigationBar(
-      currentIndex: 0, // Set to 0 for the first item (Rute Pengantaran)
+      currentIndex: 1, // Set to 1 for the second item (Akun)
       onTap: (index) {
-        switch (index) {
-          case 0:
-          // Navigate to delivery routes or another appropriate screen
-            Navigator.pushReplacementNamed(context, '/home');
-            break;
-          case 1:
-          // Stay on the current profile page (this page)
-            break;
+        if (index == 0) {
+          // Navigate to HomePage
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => HomePage(kurir: kurir)),
+          );
         }
+        // If index is 1, we're already on the ProfilePage, so do nothing
       },
       items: [
         BottomNavigationBarItem(
@@ -100,4 +91,3 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
-

@@ -1,12 +1,15 @@
-import 'dart:convert';
 
+// main.dart
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sicepat/model/Kurir.dart';
 import 'package:sicepat/ui/HomePage.dart';
 import 'package:sicepat/ui/LoginPage.dart';
 import 'package:sicepat/ui/ProfilePage.dart';
-import 'package:sicepat/ui/BuktiPengantaranPage.dart'; // Import the new page
+import 'package:sicepat/ui/BuktiPengantaranPage.dart';
+import 'package:sicepat/util/user_data_manager.dart';
+
+import 'model/DetailPengantaran.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,18 +19,7 @@ void main() async {
   Kurir? kurir;
 
   if (isLoggedIn) {
-    try {
-      final kurirData = prefs.getString('kurirData');
-      if (kurirData != null) {
-        final Map<String, dynamic> kurirMap = json.decode(kurirData);
-        kurir = Kurir.fromJson(kurirMap);
-      } else {
-        kurir = null; // Handle the case where kurirData is null
-      }
-    } catch (e) {
-      print('Error decoding Kurir data: $e');
-      kurir = null; // Handle decoding error
-    }
+    kurir = await UserDataManager.loadUserData();
   }
 
   runApp(MyApp(isLoggedIn: isLoggedIn, kurir: kurir));
@@ -55,13 +47,19 @@ class MyApp extends StatelessWidget {
         '/profile': (context) => isLoggedIn && kurir != null
             ? ProfilePage(kurir: kurir!)
             : LoginPage(),
-        '/bukti': (context) => BuktiPengantaranPage(), // Add the route for BuktiPengantaranPage
       },
       onGenerateRoute: (settings) {
+        if (settings.name == '/bukti') {
+          final args = settings.arguments as DetailPengantaran;
+          return MaterialPageRoute(
+            builder: (context) {
+              return BuktiPengantaranPage(detailPengantaran: args);
+            },
+          );
+        }
         if (settings.name == '/home' && !isLoggedIn) {
           return MaterialPageRoute(builder: (context) => LoginPage());
         }
-        // Handle other routes or return null if not matched
         return null;
       },
     );

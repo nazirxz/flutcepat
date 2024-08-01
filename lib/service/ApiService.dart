@@ -3,12 +3,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:convert';
 import 'dart:io'; // For File
 import 'package:http_parser/http_parser.dart'; // For MediaType
-import '../model/Pengantaran.dart';
-
+import 'package:image/image.dart' as img;
 import '../model/Pengantaran.dart';
 
 class ApiService {
-  static const String baseUrl = 'https://sicepat-pysk-e89b5ce47713.herokuapp.com/';
+  static const String baseUrl = 'https://sicepat-pysk-c574a389fa73.herokuapp.com/';
   final Dio _dio = Dio(BaseOptions(
     baseUrl: baseUrl,
     contentType: 'multipart/form-data',
@@ -117,50 +116,34 @@ class ApiService {
   List<LatLng> decodePolyline(String encoded) {
     List<LatLng> polyline = [];
     int index = 0, len = encoded.length;
-    int lat = 0, lng = 0;
+    int lat = 0, lon = 0;
 
     while (index < len) {
       int b, shift = 0, result = 0;
       do {
         b = encoded.codeUnitAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
+        result |= (b & 0x1F) << shift;
         shift += 5;
       } while (b >= 0x20);
-      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-      lat += dlat;
+      int deltaLat = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      lat += deltaLat;
 
       shift = 0;
       result = 0;
       do {
         b = encoded.codeUnitAt(index++) - 63;
-        result |= (b & 0x1f) << shift;
+        result |= (b & 0x1F) << shift;
         shift += 5;
       } while (b >= 0x20);
-      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-      lng += dlng;
+      int deltaLon = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      lon += deltaLon;
 
-      polyline.add(LatLng(lat / 1E5, lng / 1E5));
+      polyline.add(LatLng(lat / 1E5, lon / 1E5));
     }
+
     return polyline;
   }
 
-  Future<void> updateDetailPengantaranStatus(String detailPengantaranId, String status) async {
-    try {
-      final response = await _dio.post(
-        'api/pengantaran/update-status',
-        data: FormData.fromMap({
-          'id': detailPengantaranId,
-          'status': status,
-        }),
-      );
-
-      if (response.statusCode != 200) {
-        throw Exception('Failed to update pengantaran status with status code: ${response.statusCode}');
-      }
-    } on DioError catch (e) {
-      throw Exception('Network error: ${e.message}');
-    }
-  }
   Future<void> uploadBuktiPengantaran({
     required String tanggalTerima,
     required String waktu,
@@ -170,37 +153,76 @@ class ApiService {
     final String url = '${baseUrl}api/bukti';
 
     try {
+      final resizedImage = await _resizeImage(gambar);
       final formData = FormData.fromMap({
         'tanggal_terima': tanggalTerima,
         'waktu': waktu,
         'keterangan': keterangan,
         'gambar': await MultipartFile.fromFile(
-          gambar.path,
-          filename: gambar.path.split('/').last,
+          resizedImage.path,
+          filename: resizedImage.path.split('/').last,
           contentType: MediaType('image', 'jpeg'),
         ),
       });
 
       final response = await _dio.post(url, data: formData);
 
-      // Hapus pengecekan status code 200
-      final responseData = response.data;
-      if (responseData['status'] == 'success') {
-        print('Bukti pengantaran berhasil dikirim');
-        return;
+      // Ubah kondisi ini untuk menerima status code 200 dan 201
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = response.data;
+        if (responseData['status'] == 'success') {
+          print('Bukti pengantaran berhasil dikirim');
+          return;
+        } else {
+          final errorMessage = responseData['message'] ?? 'Unknown error';
+          throw Exception('Failed to upload image: $errorMessage');
+        }
       } else {
-        final errorMessage = responseData['message'] ?? 'Unknown error';
-        print('Gagal mengirim bukti pengantaran: $errorMessage');
-        throw Exception('Failed to upload image: $errorMessage');
+        throw Exception('Failed to upload bukti pengantaran, status code: ${response.statusCode}');
       }
     } on DioError catch (e) {
+      print('Error uploading bukti pengantaran: ${e.message}');
       if (e.response != null) {
-        print('Error details: ${e.response!.data}');
-      } else {
-        print('Network error: ${e.message}');
+        print('Response data: ${e.response!.data}');
+        print('Response headers: ${e.response!.headers}');
       }
       throw Exception('Network error: ${e.message}');
     }
   }
 
+  Future<bool> updateDetailPengantaranStatus(int id, String status) async {
+    try {
+      final response = await _dio.post(
+        'api/pengantaran/update-status',
+        data: FormData.fromMap({
+          'id': id,
+          'status': status,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = response.data;
+        if (responseData['message'] == 'Status updated successfully') {
+          return true;
+        } else {
+          print('Server returned success status code but update failed: ${responseData['message']}');
+          return false;
+        }
+      } else {
+        print('Failed to update status. Status code: ${response.statusCode}');
+        return false;
+      }
+    } on DioError catch (e) {
+      print('Network error when updating status: ${e.message}');
+      return false;
+    }
+  }
+
+  Future<File> _resizeImage(File imageFile) async {
+    final image = img.decodeImage(imageFile.readAsBytesSync())!;
+    final resizedImage = img.copyResize(image, width: 800); // Adjust size as needed
+    final resizedImageFile = File('${imageFile.path}_resized.jpg')
+      ..writeAsBytesSync(img.encodeJpg(resizedImage));
+    return resizedImageFile;
+  }
 }

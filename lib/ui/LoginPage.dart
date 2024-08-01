@@ -10,6 +10,8 @@ import '../ui/HomePage.dart';
 import '../ui/ProfilePage.dart';
 import 'dart:developer' as developer;
 
+import '../util/user_data_manager.dart';
+
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -17,6 +19,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
+
   Future<void> _login() async {
     String username = _usernameController.text.trim();
     String password = _passwordController.text;
@@ -35,18 +38,11 @@ class _LoginPageState extends State<LoginPage> {
 
       if (result != null && result['status'] == 'success') {
         Kurir kurir = Kurir.fromJson(result['kurir']);
-        final prefs = await SharedPreferences.getInstance();
 
-        // Clear previous user data
-        await prefs.remove('kurirData');
-        await prefs.setString('lastLoggedInUsername', username);
-        await prefs.setBool('isLoggedIn', true);
+        // Clear previous data and save new user data
+        await UserDataManager.clearUserData();
+        await UserDataManager.saveUserData(kurir);
 
-        // Store new user data
-        final kurirJson = json.encode(kurir.toJson());
-        await prefs.setString('kurirData', kurirJson);
-
-        // Navigate to home page with new user data
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomePage(kurir: kurir)),

@@ -16,16 +16,30 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   List<Pengantaran> _pengantaran = [];
   final ApiService _apiService = ApiService();
   int _currentIndex = 0;
-  int _selectedView = 0; // 0 for Rute Pengantaran, 1 for Riwayat Pengantaran
+  int _selectedView = 0;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _fetchPengantaranData(widget.kurir.id.toString());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _fetchPengantaranData(widget.kurir.id.toString());
+    }
   }
 
   Future<void> _fetchPengantaranData(String kurirId) async {
@@ -36,7 +50,6 @@ class _HomePageState extends State<HomePage> {
       });
     } catch (e) {
       print('Error fetching pengantaran data: $e');
-      // Handle error as needed
     }
   }
 

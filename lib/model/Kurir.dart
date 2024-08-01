@@ -40,7 +40,16 @@ class Kurir {
     'no_polisi': noPolisi,
   };
 
+  static Kurir? getInstance() {
+    return _instance;
+  }
+
+  static void setInstance(Kurir kurir) {
+    _instance = kurir;
+  }
+
   static void resetInstance() {
     _instance = null;
   }
+
 }

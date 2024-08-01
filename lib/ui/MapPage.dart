@@ -6,6 +6,8 @@ import 'dart:math';
 import 'package:sicepat/service/ApiService.dart';
 import 'package:sicepat/model/DetailPengantaran.dart';
 
+import 'BuktiPengantaranPage.dart';
+
 class MapPage extends StatefulWidget {
   final String routeName;
   final double latitude;
@@ -162,75 +164,14 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  void _showUpdateDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Update Pengantaran'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton(
-                child: Text('Delivered'),
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                  _updatePengantaranStatus('delivered'); // Update status and navigate
-                },
-              ),
-              SizedBox(height: 10),
-              ElevatedButton(
-                child: Text('Barang dikembalikan (pending)'),
-                onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                  _updatePengantaranStatus('pending'); // Update status and navigate
-                },
-              ),
-            ],
-          ),
-        );
-      },
+  void _navigateToBukti() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => BuktiPengantaranPage(
+          detailPengantaran: widget.detailPengantaran,
+        ),
+      ),
     );
-  }
-
-  void _updatePengantaranStatus(String status) async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      await _apiService.updateDetailPengantaranStatus(
-          widget.detailPengantaran.id,
-          status
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Status pengantaran berhasil diperbarui')),
-      );
-
-      // Navigate based on status
-      if (status == 'delivered') {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/bukti',
-              (Route<dynamic> route) => false,
-        );
-      } else {
-        Navigator.of(context).pushNamedAndRemoveUntil(
-            '/home',
-                (Route<dynamic> route) => false,
-            arguments: {'refresh': true}
-        );
-      }
-    } catch (e) {
-      print('Error updating pengantaran status: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Gagal memperbarui status pengantaran')),
-      );
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
 
   @override
@@ -273,12 +214,12 @@ class _MapPageState extends State<MapPage> {
             left: 16,
             right: 16,
             child: ElevatedButton(
-              onPressed: _showUpdateDialog,
+              onPressed: _navigateToBukti,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
               ),
               child: Text(
-                'Update Pengantaran',
+                'Kirim Bukti Pengantaran',
                 style: TextStyle(color: Colors.white),
               ),
             ),

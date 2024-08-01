@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io'; // For File
-import '../service/ApiService.dart'; // Update with the correct path to your ApiService
+import 'dart:io';
+import '../model/DetailPengantaran.dart';
+import '../service/ApiService.dart';
 
 class BuktiPengantaranPage extends StatefulWidget {
+  final DetailPengantaran detailPengantaran;
+
+  BuktiPengantaranPage({required this.detailPengantaran});
+
   @override
   _BuktiPengantaranPageState createState() => _BuktiPengantaranPageState();
 }
@@ -13,65 +18,87 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
   final _keteranganController = TextEditingController();
   File? _image;
   String _waktu = '';
+  final ImagePicker _picker = ImagePicker();
+  final ApiService _apiService = ApiService();
 
-  @override
-  void initState() {
-    super.initState();
-    _setCurrentTime();
-  }
-
-  @override
-  void dispose() {
-    _keteranganController.dispose();
-    super.dispose();
-  }
-
-  void _setCurrentTime() {
-    final now = DateTime.now();
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
     setState(() {
-      _waktu = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      } else {
+        print('No image selected.');
+      }
     });
   }
 
-  Future<void> _pickImage(ImageSource source) async {
-    final ImagePicker _picker = ImagePicker();
-    final XFile? pickedFile = await _picker.pickImage(source: source);
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
-    }
-  }
-
-  Future<void> _submitForm() async {
+  Future<void> _uploadBukti() async {
     if (_formKey.currentState!.validate() && _image != null) {
-      final apiService = ApiService();
-
       try {
-        await apiService.uploadBuktiPengantaran(
-          tanggalTerima: DateTime.now().toIso8601String().split('T')[0], // Current date in YYYY-MM-DD format
+        final tanggalTerima = DateTime.now().toString().split(' ')[0];
+        await _apiService.uploadBuktiPengantaran(
+          tanggalTerima: tanggalTerima,
           waktu: _waktu,
           keterangan: _keteranganController.text,
           gambar: _image!,
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Bukti pengantaran berhasil dikirim')),
+          SnackBar(content: Text('Bukti pengantaran berhasil diupload')),
         );
 
-        // Alihkan ke halaman home
-        Navigator.pushReplacementNamed(context, '/home');
+        await _updatePengantaranStatus('delivered');
 
+        // Navigate to home page
+        Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
       } catch (e) {
+        print('Error uploading bukti pengantaran: $e');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Gagal mengirim bukti pengantaran: ${e.toString()}')),
+          SnackBar(content: Text('Gagal mengupload bukti pengantaran')),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Harap lengkapi semua field dan upload gambar')),
+        SnackBar(content: Text('Pilih gambar dan isi semua field')),
       );
     }
+  }
+
+  Future<void> _updatePengantaranStatus(String status) async {
+    try {
+      if (widget.detailPengantaran.id.isEmpty) {
+        throw Exception('ID pengantaran tidak valid');
+      }
+
+      int id = int.parse(widget.detailPengantaran.id);
+      bool updateSuccess = await _apiService.updateDetailPengantaranStatus(id, status);
+
+      if (updateSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Status pengantaran berhasil diperbarui')),
+        );
+      } else {
+        throw Exception('Gagal memperbarui status pengantaran');
+      }
+    } catch (e) {
+      print('Error updating pengantaran status: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal memperbarui status pengantaran: ${e.toString()}')),
+      );
+    }
+  }
+
+  void _getCurrentTime() {
+    final now = DateTime.now();
+    setState(() {
+      _waktu = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}";
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentTime();
   }
 
   @override
@@ -84,57 +111,31 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
+          child: ListView(
             children: [
-              _image == null
-                  ? Text('Tidak ada gambar yang dipilih.')
-                  : Image.file(
-                _image!,
-                width: 350, // Adjust the width as needed
-                height: 350, // Adjust the height as needed
-                fit: BoxFit.cover, // To make sure the image fits within the box
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Tanggal Terima',
-                ),
-                initialValue: DateTime.now().toLocal().toString().split(' ')[0],
-                readOnly: true,
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Waktu',
-                ),
-                initialValue: _waktu,
-                readOnly: true,
-              ),
               TextFormField(
                 controller: _keteranganController,
-                decoration: InputDecoration(
-                  labelText: 'Keterangan',
-                ),
+                decoration: InputDecoration(labelText: 'Keterangan'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Keterangan harus diisi';
+                    return 'Keterangan tidak boleh kosong';
                   }
                   return null;
                 },
               ),
               SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: () => _pickImage(ImageSource.camera),
-                    child: Text('Ambil Foto'),
-                  ),
-                ],
+              _image == null
+                  ? Text('No image selected.')
+                  : Image.file(_image!),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _pickImage,
+                child: Text('Pilih Gambar'),
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _submitForm,
-                child: Text('Kirim Bukti'),
+                onPressed: _uploadBukti,
+                child: Text('Upload Bukti Pengantaran'),
               ),
             ],
           ),
