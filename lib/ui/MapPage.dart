@@ -116,6 +116,7 @@ class _MapPageState extends State<MapPage> {
       );
 
       setState(() {
+        _polylines.clear(); // Clear existing polylines
         _polylines.add(Polyline(
           polylineId: PolylineId('optimumRoute'),
           points: routePoints,
@@ -124,16 +125,28 @@ class _MapPageState extends State<MapPage> {
         ));
 
         _markers.clear();
+        // Add marker for current location
         _markers.add(Marker(
           markerId: MarkerId('currentLocation'),
           position: _currentLocation!,
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
         ));
-        _markers.add(Marker(
-          markerId: MarkerId('destination'),
-          position: LatLng(widget.latitude, widget.longitude),
-          icon: BitmapDescriptor.defaultMarker,
-        ));
+
+        // Add marker for the start of the route
+        if (routePoints.isNotEmpty) {
+          _markers.add(Marker(
+            markerId: MarkerId('start'),
+            position: routePoints.first,
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+          ));
+
+          // Add marker for the end of the route
+          _markers.add(Marker(
+            markerId: MarkerId('end'),
+            position: routePoints.last,
+            icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          ));
+        }
       });
 
       LatLngBounds bounds = _getBounds(routePoints);
@@ -149,6 +162,7 @@ class _MapPageState extends State<MapPage> {
       });
     }
   }
+
 
   LatLngBounds _getBounds(List<LatLng> points) {
     double? minLat, maxLat, minLng, maxLng;

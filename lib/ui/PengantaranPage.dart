@@ -6,6 +6,7 @@ import '../model/DetailPengantaran.dart';
 import 'dart:math' show sqrt, pow, sin, cos, atan2;
 import 'package:location/location.dart';
 
+// PengantaranPage merupakan StatefulWidget yang menerima daftar pengantaran, status, dan kurirId
 class PengantaranPage extends StatefulWidget {
   final List<Pengantaran> pengantaran;
   final String status;
@@ -33,10 +34,12 @@ class _PengantaranPageState extends State<PengantaranPage> {
     _getCurrentLocation();
   }
 
+  // Fungsi untuk mendapatkan lokasi pengguna saat ini
   void _getCurrentLocation() async {
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
 
+    // Memeriksa apakah layanan lokasi diaktifkan
     _serviceEnabled = await _location.serviceEnabled();
     if (!_serviceEnabled) {
       _serviceEnabled = await _location.requestService();
@@ -45,6 +48,7 @@ class _PengantaranPageState extends State<PengantaranPage> {
       }
     }
 
+    // Memeriksa apakah aplikasi memiliki izin lokasi
     _permissionGranted = await _location.hasPermission();
     if (_permissionGranted == PermissionStatus.denied) {
       _permissionGranted = await _location.requestPermission();
@@ -53,6 +57,7 @@ class _PengantaranPageState extends State<PengantaranPage> {
       }
     }
 
+    // Mendapatkan data lokasi saat ini
     final LocationData position = await _location.getLocation();
 
     setState(() {
@@ -60,20 +65,23 @@ class _PengantaranPageState extends State<PengantaranPage> {
     });
   }
 
+  // Fungsi untuk menghitung jarak antara dua koordinat geografis
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    var p = 0.017453292519943295;
+    var p = 0.017453292519943295; // Konversi derajat ke radian
     var c = cos;
     var a = 0.5 - c((lat2 - lat1) * p) / 2 +
         c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
-    return 12742 * atan2(sqrt(a), sqrt(1 - a)); // 2 * R; R = 6371 km
+    return 12742 * atan2(sqrt(a), sqrt(1 - a)); // Mengembalikan jarak dalam kilometer
   }
 
   @override
   Widget build(BuildContext context) {
+    // Menampilkan loading indikator jika posisi saat ini belum diperoleh
     if (_currentPosition == null) {
       return Center(child: CircularProgressIndicator());
     }
 
+    // Menampilkan RefreshIndicator untuk menyegarkan data
     return RefreshIndicator(
       onRefresh: () async {
         if (widget.onRefreshData != null) {
@@ -84,12 +92,15 @@ class _PengantaranPageState extends State<PengantaranPage> {
     );
   }
 
+  // Fungsi untuk membangun konten rute pengantaran
   Widget _buildRutePengantaranContent(BuildContext context, List<Pengantaran> pengantaran) {
+    // Menyaring detail pengantaran berdasarkan status
     List<DetailPengantaran> filteredDetails = pengantaran
         .expand((pengantaran) => pengantaran.detailPengantaran)
         .where((detail) => detail.status == widget.status)
         .toList();
 
+    // Menampilkan pesan jika tidak ada pengantaran yang sesuai dengan status
     if (filteredDetails.isEmpty) {
       return Center(
         child: Text(
@@ -101,16 +112,18 @@ class _PengantaranPageState extends State<PengantaranPage> {
       );
     }
 
-    // Sort filteredDetails based on calculated distance
+    // Mengambil koordinat lokasi pengguna
     double userLat = _currentPosition!.latitude!;
     double userLon = _currentPosition!.longitude!;
 
+    // Mengurutkan detail pengantaran berdasarkan jarak dari lokasi pengguna
     filteredDetails.sort((a, b) {
       double distanceA = calculateDistance(userLat, userLon, a.latitude, a.longitude);
       double distanceB = calculateDistance(userLat, userLon, b.latitude, b.longitude);
       return distanceA.compareTo(distanceB);
     });
 
+    // Membangun daftar kartu rute pengantaran
     return ListView.builder(
       itemCount: filteredDetails.length,
       itemBuilder: (context, index) {
@@ -128,8 +141,8 @@ class _PengantaranPageState extends State<PengantaranPage> {
           kurirId: widget.kurirId,
           bgColor: widget.status == 'pending' ? Colors.yellow[100] : Colors.green[100],
           detailPengantaran: detail,
-          distance: distance, // Add this parameter to RouteCard if you want to display the distance
-          showRouteButton: widget.status == 'pending', // Only show button if status is pending
+          distance: distance, // Menambahkan parameter jarak ke RouteCard jika ingin menampilkan jarak
+          showRouteButton: widget.status == 'pending', // Tombol hanya ditampilkan jika status pending
         );
       },
     );

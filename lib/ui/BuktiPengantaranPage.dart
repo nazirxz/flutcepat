@@ -4,6 +4,7 @@ import 'dart:io';
 import '../model/DetailPengantaran.dart';
 import '../service/ApiService.dart';
 
+// Halaman untuk mengunggah bukti pengantaran
 class BuktiPengantaranPage extends StatefulWidget {
   final DetailPengantaran detailPengantaran;
 
@@ -14,28 +15,30 @@ class BuktiPengantaranPage extends StatefulWidget {
 }
 
 class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _keteranganController = TextEditingController();
-  File? _image;
-  String _waktu = '';
-  final ImagePicker _picker = ImagePicker();
-  final ApiService _apiService = ApiService();
+  final _formKey = GlobalKey<FormState>(); // Kunci untuk form validasi
+  final _keteranganController = TextEditingController(); // Kontroler untuk input teks keterangan
+  File? _image; // Variabel untuk menyimpan file gambar yang dipilih
+  String _waktu = ''; // Variabel untuk menyimpan waktu saat ini
+  final ImagePicker _picker = ImagePicker(); // Objek untuk memilih gambar dari kamera atau galeri
+  final ApiService _apiService = ApiService(); // Instance dari ApiService untuk operasi API
 
+  // Fungsi untuk memilih gambar dari kamera
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
     setState(() {
       if (pickedFile != null) {
-        _image = File(pickedFile.path);
+        _image = File(pickedFile.path); // Simpan gambar yang dipilih ke variabel _image
       } else {
         print('No image selected.');
       }
     });
   }
 
+  // Fungsi untuk mengunggah bukti pengantaran
   Future<void> _uploadBukti() async {
-    if (_formKey.currentState!.validate() && _image != null) {
+    if (_formKey.currentState!.validate() && _image != null) { // Validasi form dan cek apakah gambar sudah dipilih
       try {
-        final tanggalTerima = DateTime.now().toString().split(' ')[0];
+        final tanggalTerima = DateTime.now().toString().split(' ')[0]; // Dapatkan tanggal saat ini
         await _apiService.uploadBuktiPengantaran(
           tanggalTerima: tanggalTerima,
           waktu: _waktu,
@@ -47,7 +50,7 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
           SnackBar(content: Text('Bukti pengantaran berhasil diupload')),
         );
 
-        await _updatePengantaranStatus('delivered');
+        await _updatePengantaranStatus('delivered'); // Perbarui status pengantaran menjadi 'delivered'
 
         // Navigate to home page
         Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
@@ -64,14 +67,15 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
     }
   }
 
+  // Fungsi untuk memperbarui status pengantaran
   Future<void> _updatePengantaranStatus(String status) async {
     try {
       if (widget.detailPengantaran.id.isEmpty) {
         throw Exception('ID pengantaran tidak valid');
       }
 
-      int id = int.parse(widget.detailPengantaran.id);
-      bool updateSuccess = await _apiService.updateDetailPengantaranStatus(id, status);
+      int id = int.parse(widget.detailPengantaran.id); // Konversi ID pengantaran ke integer
+      bool updateSuccess = await _apiService.updateDetailPengantaranStatus(id, status); // Panggil API untuk memperbarui status
 
       if (updateSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -88,19 +92,22 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
     }
   }
 
+  // Fungsi untuk mendapatkan waktu saat ini
   void _getCurrentTime() {
     final now = DateTime.now();
     setState(() {
-      _waktu = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}";
+      _waktu = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}"; // Format waktu dalam format HH:MM:SS
     });
   }
 
+  // Inisialisasi state
   @override
   void initState() {
     super.initState();
-    _getCurrentTime();
+    _getCurrentTime(); // Panggil fungsi untuk mendapatkan waktu saat ini
   }
 
+  // Membangun UI halaman
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -110,7 +117,7 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey,
+          key: _formKey, // Kunci form untuk validasi
           child: ListView(
             children: [
               TextFormField(
@@ -126,15 +133,15 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
               SizedBox(height: 20),
               _image == null
                   ? Text('No image selected.')
-                  : Image.file(_image!),
+                  : Image.file(_image!), // Menampilkan gambar yang dipilih
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _pickImage,
-                child: Text('Pilih Gambar'),
+                onPressed: _pickImage, // Panggil fungsi untuk memilih gambar
+                child: Text('Ambil Gambar'),
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _uploadBukti,
+                onPressed: _uploadBukti, // Panggil fungsi untuk mengunggah bukti pengantaran
                 child: Text('Upload Bukti Pengantaran'),
               ),
             ],

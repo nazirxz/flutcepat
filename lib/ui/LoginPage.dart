@@ -12,18 +12,24 @@ import 'dart:developer' as developer;
 
 import '../util/user_data_manager.dart';
 
+// LoginPage widget yang menggunakan StatefulWidget untuk mengelola keadaan
 class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
+  // Controller untuk mengelola input dari pengguna
   final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final ApiService _apiService = ApiService();
 
+  // Fungsi untuk menangani proses login
   Future<void> _login() async {
     String username = _usernameController.text.trim();
     String password = _passwordController.text;
 
+    // Validasi input: memeriksa apakah username atau password kosong
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Username and password are required')),
@@ -32,17 +38,20 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     try {
+      // Memanggil API untuk login
       final result = await _apiService.login(username, password);
 
       developer.log("Login Result: $result");
 
+      // Memeriksa hasil login
       if (result != null && result['status'] == 'success') {
         Kurir kurir = Kurir.fromJson(result['kurir']);
 
-        // Clear previous data and save new user data
+        // Menghapus data pengguna sebelumnya dan menyimpan data pengguna baru
         await UserDataManager.clearUserData();
         await UserDataManager.saveUserData(kurir);
 
+        // Navigasi ke HomePage dengan parameter kurir
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => HomePage(kurir: kurir)),
@@ -60,10 +69,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  final TextEditingController _passwordController = TextEditingController();
-  final ApiService _apiService = ApiService();
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,6 +78,7 @@ class _LoginPageState extends State<LoginPage> {
         child: ListView(
           children: [
             SizedBox(height: 50),
+            // Header login
             Row(
               children: [
                 Text(
@@ -98,12 +104,14 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 40),
+            // Ilustrasi login
             SvgPicture.asset(
               'assets/login_illustration.svg',
               width: 257,
               height: 236,
             ),
             const SizedBox(height: 40),
+            // Label dan field input untuk username
             Text(
               'Username',
               style: poppinBold.copyWith(
@@ -121,6 +129,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 20),
+            // Label dan field input untuk password
             Text(
               'Password',
               style: poppinBold.copyWith(
@@ -139,11 +148,13 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             const SizedBox(height: 20),
+            // Tombol custom untuk login
             CustomFilledButton(
               title: 'Login',
               onPressed: _login,
             ),
             const SizedBox(height: 150),
+            // Footer
             Align(
               child: Text(
                 'PT. Sicepat Payung Sekaki',

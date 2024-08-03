@@ -61,9 +61,9 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        final List<dynamic> routePoints = data['optimal_route'];
+        final List<dynamic> nearestLocations = data['nearest_locations'];
 
-        List<LatLng> waypoints = routePoints.map((point) => LatLng(
+        List<LatLng> waypoints = nearestLocations.map((point) => LatLng(
             double.parse(point['lat']),
             double.parse(point['lon'])
         )).toList();
@@ -76,7 +76,6 @@ class ApiService {
       throw Exception('Network error: ${e.message}');
     }
   }
-
   Future<List<LatLng>> _getRouteFromGoogleDirectionsApi(List<LatLng> waypoints) async {
     if (waypoints.isEmpty) return [];
 
