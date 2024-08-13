@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:geolocator/geolocator.dart';
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:path_provider/path_provider.dart';
 import '../model/DetailPengantaran.dart';
 import '../service/ApiService.dart';
 
-// Halaman untuk mengunggah bukti pengantaran
 class BuktiPengantaranPage extends StatefulWidget {
   final DetailPengantaran detailPengantaran;
 
@@ -15,30 +17,72 @@ class BuktiPengantaranPage extends StatefulWidget {
 }
 
 class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
-  final _formKey = GlobalKey<FormState>(); // Kunci untuk form validasi
-  final _keteranganController = TextEditingController(); // Kontroler untuk input teks keterangan
-  File? _image; // Variabel untuk menyimpan file gambar yang dipilih
-  String _waktu = ''; // Variabel untuk menyimpan waktu saat ini
-  final ImagePicker _picker = ImagePicker(); // Objek untuk memilih gambar dari kamera atau galeri
-  final ApiService _apiService = ApiService(); // Instance dari ApiService untuk operasi API
+  final _formKey = GlobalKey<FormState>();
+  final _keteranganController = TextEditingController();
+  File? _image;
+  String _waktu = '';
+  Position? _currentPosition;
+  String? _latitude;
+  String? _longitude;
+  final ImagePicker _picker = ImagePicker();
+  final ApiService _apiService = ApiService();
 
-  // Fungsi untuk memilih gambar dari kamera
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path); // Simpan gambar yang dipilih ke variabel _image
-      } else {
-        print('No image selected.');
+    if (pickedFile != null) {
+      File file = File(pickedFile.path);
+      await _addLocationAndTimestamp(file);
+      setState(() {
+        _image = file;
+      });
+    } else {
+      print('No image selected.');
+    }
+  }
+
+  Future<void> _addLocationAndTimestamp(File imageFile) async {
+    try {
+      _currentPosition = await _determinePosition();
+      if (_currentPosition != null) {
+        _latitude = _currentPosition!.latitude.toStringAsFixed(6);
+        _longitude = _currentPosition!.longitude.toStringAsFixed(6);
+        _waktu = DateTime.now().toIso8601String();
+        setState(() {});
       }
-    });
+    } catch (e) {
+      print('Error retrieving location and timestamp: $e');
+    }
+  }
+
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied.');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error('Location permissions are permanently denied.');
+    }
+
+    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
 
   // Fungsi untuk mengunggah bukti pengantaran
   Future<void> _uploadBukti() async {
-    if (_formKey.currentState!.validate() && _image != null) { // Validasi form dan cek apakah gambar sudah dipilih
+    if (_formKey.currentState!.validate() && _image != null) {
       try {
-        final tanggalTerima = DateTime.now().toString().split(' ')[0]; // Dapatkan tanggal saat ini
+        final tanggalTerima = DateTime.now().toString().split(' ')[0];
         await _apiService.uploadBuktiPengantaran(
           tanggalTerima: tanggalTerima,
           waktu: _waktu,
@@ -50,9 +94,8 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
           SnackBar(content: Text('Bukti pengantaran berhasil diupload')),
         );
 
-        await _updatePengantaranStatus('delivered'); // Perbarui status pengantaran menjadi 'delivered'
+        await _updatePengantaranStatus('delivered');
 
-        // Navigate to home page
         Navigator.of(context).pushNamedAndRemoveUntil('/home', (route) => false);
       } catch (e) {
         print('Error uploading bukti pengantaran: $e');
@@ -74,8 +117,8 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
         throw Exception('ID pengantaran tidak valid');
       }
 
-      int id = int.parse(widget.detailPengantaran.id); // Konversi ID pengantaran ke integer
-      bool updateSuccess = await _apiService.updateDetailPengantaranStatus(id, status); // Panggil API untuk memperbarui status
+      int id = int.parse(widget.detailPengantaran.id);
+      bool updateSuccess = await _apiService.updateDetailPengantaranStatus(id, status);
 
       if (updateSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -92,22 +135,19 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
     }
   }
 
-  // Fungsi untuk mendapatkan waktu saat ini
   void _getCurrentTime() {
     final now = DateTime.now();
     setState(() {
-      _waktu = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}"; // Format waktu dalam format HH:MM:SS
+      _waktu = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}";
     });
   }
 
-  // Inisialisasi state
   @override
   void initState() {
     super.initState();
-    _getCurrentTime(); // Panggil fungsi untuk mendapatkan waktu saat ini
+    _getCurrentTime();
   }
 
-  // Membangun UI halaman
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,7 +157,7 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey, // Kunci form untuk validasi
+          key: _formKey,
           child: ListView(
             children: [
               TextFormField(
@@ -133,15 +173,32 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
               SizedBox(height: 20),
               _image == null
                   ? Text('No image selected.')
-                  : Image.file(_image!), // Menampilkan gambar yang dipilih
+                  : Stack(
+                alignment: Alignment.bottomLeft,
+                children: [
+                  Image.file(_image!),
+                  if (_latitude != null && _longitude != null)
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Lat: $_latitude, Long: $_longitude\nTimestamp: $_waktu',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          backgroundColor: Colors.black54,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _pickImage, // Panggil fungsi untuk memilih gambar
+                onPressed: _pickImage,
                 child: Text('Ambil Gambar'),
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _uploadBukti, // Panggil fungsi untuk mengunggah bukti pengantaran
+                onPressed: _uploadBukti,
                 child: Text('Upload Bukti Pengantaran'),
               ),
             ],
