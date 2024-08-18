@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:geolocator/geolocator.dart';
@@ -6,6 +7,8 @@ import 'dart:typed_data';
 import 'package:path_provider/path_provider.dart';
 import '../model/DetailPengantaran.dart';
 import '../service/ApiService.dart';
+import 'dart:ui' as ui;
+import 'package:image/image.dart' as img;
 
 class BuktiPengantaranPage extends StatefulWidget {
   final DetailPengantaran detailPengantaran;
@@ -47,12 +50,28 @@ class _BuktiPengantaranPageState extends State<BuktiPengantaranPage> {
         _latitude = _currentPosition!.latitude.toStringAsFixed(6);
         _longitude = _currentPosition!.longitude.toStringAsFixed(6);
         _waktu = DateTime.now().toIso8601String();
-        setState(() {});
+
+        final img.Image? image = img.decodeImage(imageFile.readAsBytesSync());
+        if (image != null) {
+          final font = img.arial_24;
+          final timestampText = 'Lat: $_latitude, Long: $_longitude\nTimestamp: $_waktu ';
+
+          img.drawString(image, font, 10, 10, timestampText, color: img.getColor(255, 255, 255));
+
+          final directory = await getApplicationDocumentsDirectory();
+          final newPath = '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.png';
+          File(newPath)..writeAsBytesSync(img.encodePng(image));
+
+          setState(() {
+            _image = File(newPath);
+          });
+        }
       }
     } catch (e) {
       print('Error retrieving location and timestamp: $e');
     }
   }
+
 
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
